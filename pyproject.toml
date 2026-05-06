@@ -1,0 +1,13 @@
+[project]
+name = "llm-maintainability-benchmark"
+version = "0.1.0"
+description = "Small benchmark harness for measuring LLM maintainability friction across code styles."
+requires-python = ">=3.10"
+
+[project.scripts]
+llm-maintainability-benchmark = "llm_code_benchmark.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
