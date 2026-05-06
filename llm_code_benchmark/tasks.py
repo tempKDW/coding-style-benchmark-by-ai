@@ -289,11 +289,79 @@ DOMAIN_LAYERING_TASKS: tuple[Task, ...] = (
 )
 
 
+ENUM_VS_STR_TASKS: tuple[Task, ...] = (
+    Task(
+        id="add_value",
+        name="Add new role value (MODERATOR)",
+        kind="patch",
+        prompt=(
+            "MODERATOR 권한을 추가하세요. can_access에서 MODERATOR는 {'profile', 'feed', 'logs'}에 접근 가능, "
+            "role_label은 '운영자'를 반환합니다. 기존 USER/ADMIN/SUPER_ADMIN 동작은 그대로 유지하세요. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("MODERATOR", "운영자", "logs"),
+        max_target_locations=3,
+        edge_markers=("USER", "ADMIN", "SUPER_ADMIN"),
+    ),
+    Task(
+        id="rename_value",
+        name="Rename ADMIN to MANAGER",
+        kind="patch",
+        prompt=(
+            "ADMIN 권한을 MANAGER로 이름과 값 모두 변경하세요. 모든 등장 위치(상수, allowed 목록, 분기, "
+            "label 등)를 일관되게 변경합니다. 기존 USER/SUPER_ADMIN과 다른 동작은 그대로 유지하세요. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("MANAGER",),
+        max_target_locations=4,
+        edge_markers=("USER", "SUPER_ADMIN", "users"),
+    ),
+    Task(
+        id="add_dispatch",
+        name="Add permission_level dispatcher",
+        kind="patch",
+        prompt=(
+            "permission_level(role) 함수를 추가하세요. USER이면 1, ADMIN이면 2, SUPER_ADMIN이면 3을 반환합니다. "
+            "잘못된 role이면 ValueError가 발생해야 합니다 (기존 검증 메커니즘 활용). "
+            "기존 함수들은 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("permission_level", "1", "2", "3"),
+        max_target_locations=1,
+        edge_markers=("USER", "ADMIN", "SUPER_ADMIN"),
+    ),
+    Task(
+        id="serialize_external",
+        name="Serialize role for external API",
+        kind="patch",
+        prompt=(
+            "serialize_role_for_api(role) 함수를 추가하세요. role의 lowercase 문자열을 반환합니다 "
+            "(예: USER → 'user'). 잘못된 role이면 ValueError가 발생해야 합니다. "
+            "기존 함수들은 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("serialize_role_for_api", "lower"),
+        max_target_locations=1,
+        edge_markers=("USER", "ADMIN", "SUPER_ADMIN"),
+    ),
+    Task(
+        id="explain_code",
+        name="Explain role typing style",
+        kind="analysis",
+        prompt=(
+            "이 코드의 role 타입 표현 방식, validation 메커니즘, 분기 처리 방식, "
+            "발견성(discoverability), 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요."
+        ),
+        expected_terms=("validation", "branch"),
+        max_target_locations=0,
+    ),
+)
+
+
 SCENARIOS: dict[str, tuple[Task, ...]] = {
     "discount": TASKS,
     "validation": VALIDATION_TASKS,
     "function_shape": FUNCTION_SHAPE_TASKS,
     "domain_layering": DOMAIN_LAYERING_TASKS,
+    "enum_vs_str": ENUM_VS_STR_TASKS,
 }
 
 
@@ -302,4 +370,5 @@ SCENARIO_EXAMPLES: dict[str, str] = {
     "validation": "examples-validation",
     "function_shape": "examples-function-shape",
     "domain_layering": "examples-domain-layering",
+    "enum_vs_str": "examples-enum-vs-str",
 }

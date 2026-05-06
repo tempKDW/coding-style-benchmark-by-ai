@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Role을 모듈 수준 string 상수로 추출하고 ALLOWED_ROLES tuple로 검증하는 절충 스타일입니다. validation은 validate_role 함수가 ALLOWED_ROLES in 검사로 수행. branch 처리는 여전히 if-chain이지만 변수명(USER, ADMIN, ...)으로 비교하므로 raw string 오타는 줄어듭니다. discoverability는 from module import USER, ADMIN처럼 명시적 import로 일부 향상되며 grep도 유효. flow는 caller가 모듈 상수 또는 raw string을 넘김(둘 다 동등 값으로 호환). Edge case: 새 상수 추가 시 ALLOWED_ROLES tuple에 추가하는 걸 깜빡하면 새 값이 검증을 통과하지 못함, raw string 'USER'와 USER 변수가 같은 문자열이어서 caller 입장에서 둘이 호환되어 enforcement가 약함, 상수 변수명 자체가 도메인 의미를 충분히 노출하지 못함.",
+  "confidence": 0.9
+}

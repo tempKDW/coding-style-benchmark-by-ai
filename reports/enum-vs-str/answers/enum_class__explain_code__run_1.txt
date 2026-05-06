@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Role을 Enum 클래스로 정의해 멤버 자체가 곧 타입이자 validation의 단일 출처(single source of truth) 역할을 하는 강타입 스타일입니다. validation은 Role(value) 생성자가 자동으로 ValueError를 발생시켜 별도 ALLOWED 목록 불필요. branch 처리는 Role.X is 비교 또는 dict 매핑으로 가능하며, IDE 자동완성으로 모든 멤버가 즉시 노출됩니다. discoverability는 Role.<TAB>으로 모든 가능 값을 한눈에 확인. flow는 caller가 raw string을 넘기고 entry에서 Role(value)로 정규화. Edge case: 외부 직렬화 시 Role.USER.value 추출 한 단계 필요(.value 호출 누락 시 'Role.USER' 문자열이 직렬화됨), JSON 같은 형식으로 보낼 때 enum 자체는 직접 직렬화 불가, 멤버명과 .value가 다를 경우 caller 측이 어느 쪽이 외부 표현인지 헷갈리기 쉬움.",
+  "confidence": 0.9
+}

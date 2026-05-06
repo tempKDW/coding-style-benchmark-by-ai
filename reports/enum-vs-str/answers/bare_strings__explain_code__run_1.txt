@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Role을 raw string literal로 다루며 함수 내부 인라인 if-chain으로 branch 처리하는 가장 단순한 스타일입니다. validation은 validate_role 함수가 ALLOWED tuple에 in 검사로 수행하며 모든 진입 함수가 호출. branch 처리는 raw 문자열 비교 if-chain (role == 'USER' ...). discoverability는 IDE 자동완성 없이 grep 의존이고 오타가 런타임에야 발견됩니다. flow는 caller가 raw string을 그대로 넘기는 형태. Edge case: 'user' (lowercase)는 'USER'와 다른 값으로 거절, 새 role 추가 시 ALLOWED tuple과 모든 if-chain을 N곳 grep으로 빠뜨리지 않고 갱신해야 함, 잘못 입력된 'ADMINS' 같은 오타도 런타임에만 발견.",
+  "confidence": 0.9
+}

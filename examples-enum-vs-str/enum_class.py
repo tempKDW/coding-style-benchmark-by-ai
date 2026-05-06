@@ -1,0 +1,33 @@
+from enum import Enum
+
+
+class Role(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
+
+
+def validate_role(role_value):
+    return Role(role_value)
+
+
+def can_access(role_value, resource):
+    role = Role(role_value)
+    if role is Role.USER:
+        return resource in {"profile", "feed"}
+    if role is Role.ADMIN:
+        return resource in {"profile", "feed", "users", "logs"}
+    if role is Role.SUPER_ADMIN:
+        return True
+    return False
+
+
+def role_label(role_value):
+    role = Role(role_value)
+    if role is Role.USER:
+        return "사용자"
+    if role is Role.ADMIN:
+        return "관리자"
+    if role is Role.SUPER_ADMIN:
+        return "최고관리자"
+    return ""
