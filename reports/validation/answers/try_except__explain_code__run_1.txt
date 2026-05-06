@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "ValidationError를 raise하는 헬퍼 3개(_check_email, _check_age, _check_country)와 단일 try/except로 감싸는 register_user의 try-except validation 스타일입니다. 검증 rule 추가는 새 _check_X 헬퍼를 만들고 register_user의 try 블록 안에서 호출하는 두 곳을 수정해야 합니다. Edge case는 빈 email이 @ 검사를 통과하는 것, 그리고 헬퍼 호출 순서가 어떤 ValidationError가 먼저 발생할지 결정한다는 점입니다.",
+  "confidence": 0.9
+}

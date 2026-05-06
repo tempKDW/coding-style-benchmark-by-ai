@@ -1,0 +1,8 @@
+{
+  "target_locations": [
+    {"symbol": "OrderProcessor.compute_tax", "reason": "self.subtotal, self.discount, self.ship_fee, self.tax_country에 강결합되어 있어 (subtotal, discount, ship_fee, tax_country) 직접 인자를 받는 staticmethod 또는 모듈 free function으로 추출 필요"},
+    {"symbol": "compute_tax callers", "reason": "추출 후 self 속성을 풀어 호출하도록 변경"}
+  ],
+  "answer": "compute_tax 메서드는 self.subtotal/discount/ship_fee/tax_country에 강결합되어 있어, 환불 등 다른 컨텍스트에서 재사용하려면 staticmethod 또는 모듈 수준 free function으로 (subtotal, discount, ship_fee, tax_country) 시그니처를 노출하도록 추출해야 합니다.",
+  "confidence": 0.85
+}

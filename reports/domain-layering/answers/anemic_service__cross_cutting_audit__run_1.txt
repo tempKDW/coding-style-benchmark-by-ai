@@ -1,0 +1,39 @@
+from dataclasses import dataclass
+
+
+@dataclass
+class Account:
+    id: str
+    balance: int
+    frozen: bool = False
+
+
+def deposit(account, amount, audit_log):
+    if account.frozen:
+        raise ValueError("frozen")
+    account.balance += amount
+    audit_log.append({"op": "deposit", "account_id": account.id, "amount": amount})
+    return account
+
+
+def withdraw(account, amount, audit_log):
+    if account.frozen:
+        raise ValueError("frozen")
+    if account.balance < amount:
+        raise ValueError("insufficient")
+    account.balance -= amount
+    audit_log.append({"op": "withdraw", "account_id": account.id, "amount": amount})
+    return account
+
+
+def freeze(account, reason, audit_log):
+    account.frozen = True
+    audit_log.append({"op": "freeze", "account_id": account.id, "reason": reason})
+    return account
+
+
+def transfer(from_account, to_account, amount, audit_log):
+    withdraw(from_account, amount, audit_log)
+    deposit(to_account, amount, audit_log)
+    audit_log.append({"op": "transfer", "account_id": from_account.id, "amount": amount})
+    return from_account, to_account

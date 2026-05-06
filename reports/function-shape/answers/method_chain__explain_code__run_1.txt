@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "OrderProcessor 클래스의 메서드 체이닝 (return self) 스타일입니다. __init__에서 10개 params를 self에 저장하고, validate→price→ship→compute_tax→pay 5단계 메서드 flow가 각각 self를 변경한 뒤 다음 stage에 연결됩니다. process_order 모듈 함수가 인스턴스화하고 체인을 호출하는 진입점이며, 데이터 전달은 공유 self 사이드 이펙트로 이뤄집니다. 실수하기 쉬운 edge case: pay만 dict를 반환해 체인이 그곳에서 끊김(다른 stage는 self), def tax 대신 compute_tax로 self.tax 데이터 속성과의 이름 충돌을 회피한 점, idempotency_key처럼 self에 저장만 되고 사용되지 않는 속성, 단계 간 self 상태 공유로 호출 순서 강결합.",
+  "confidence": 0.9
+}

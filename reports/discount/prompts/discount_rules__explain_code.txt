@@ -1,0 +1,31 @@
+Candidate: discount_rules.py
+
+Task:
+이 코드의 데이터 흐름, 정책 변경 지점, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+DISCOUNT_RATES = {
+    "VIP": 0.15,
+    "NEW": 0.05,
+}
+
+
+def calculate_discount(price, user_type, coupon_amount=0):
+    rate = DISCOUNT_RATES.get(user_type, 0)
+    discount = price * rate
+    discount += coupon_amount
+    return discount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return price - discount
+

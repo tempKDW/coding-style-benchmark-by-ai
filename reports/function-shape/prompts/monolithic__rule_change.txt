@@ -1,0 +1,49 @@
+Candidate: monolithic.py
+
+Task:
+세율을 변경하세요: KR은 0.10에서 0.12로, KR이 아닌 경우는 0.05에서 0.08로. 다른 단계(검증, 가격, 배송, 결제) 로직은 그대로 유지해야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def process_order(
+    user_id,
+    items,
+    coupon_code,
+    address,
+    ship_method,
+    payment_method,
+    payment_token,
+    tax_country,
+    currency,
+    idempotency_key,
+):
+    if not items:
+        return {"ok": False, "error": "empty cart"}
+    if not address:
+        return {"ok": False, "error": "missing address"}
+
+    subtotal = sum(item["price"] * item["qty"] for item in items)
+    discount = subtotal * 0.10 if coupon_code == "SAVE10" else 0
+
+    ship_fee = 5000 if ship_method == "standard" else 10000
+
+    tax_rate = 0.10 if tax_country == "KR" else 0.05
+    tax = (subtotal - discount + ship_fee) * tax_rate
+
+    total = subtotal - discount + ship_fee + tax
+
+    return {
+        "ok": True,
+        "user_id": user_id,
+        "subtotal": subtotal,
+        "discount": discount,
+        "ship_fee": ship_fee,
+        "tax": tax,
+        "total": total,
+        "currency": currency,
+        "payment_method": payment_method,
+    }
+

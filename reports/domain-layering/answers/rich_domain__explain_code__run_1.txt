@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Account 도메인 클래스가 데이터(id/balance/frozen)와 비즈니스 동작(deposit/withdraw/freeze/transfer_to)을 모두 보유하는 rich domain 패턴입니다. 발견성은 IDE 자동완성으로 우수 — account.<TAB>으로 모든 가능 동작을 한눈에 봄. transfer_to가 두 Account를 매개해 cross-aggregate 워크플로우를 메서드로 표현하지만 의미상 어느 쪽 클래스에 속할지 모호한 awkwardness가 있어 워크플로우가 늘면 클래스가 점점 비대해집니다. flow는 메서드 호출 체인. Edge case: transfer_to 같은 다중 도메인 동작이 클래스에 포함되면서 클래스 책임이 흐려짐, self.frozen 같은 invariant가 메서드 안에서는 보호되지만 외부에서 self.frozen = True 직접 mutation을 막진 못함, transfer 중간 실패 시 부분 실행 위험은 동일.",
+  "confidence": 0.9
+}

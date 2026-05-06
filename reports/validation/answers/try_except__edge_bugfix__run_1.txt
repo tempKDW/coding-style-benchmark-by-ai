@@ -1,0 +1,30 @@
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+class ValidationError(Exception):
+    pass
+
+
+def _check_email(email):
+    if not email.strip() or "@" not in email:
+        raise ValidationError("invalid email")
+
+
+def _check_age(age):
+    if not (13 <= age <= 120):
+        raise ValidationError("invalid age")
+
+
+def _check_country(country):
+    if country not in ALLOWED_COUNTRIES:
+        raise ValidationError("invalid country")
+
+
+def register_user(email, age, country):
+    try:
+        _check_email(email)
+        _check_age(age)
+        _check_country(country)
+    except ValidationError as exc:
+        return {"ok": False, "error": str(exc)}
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}

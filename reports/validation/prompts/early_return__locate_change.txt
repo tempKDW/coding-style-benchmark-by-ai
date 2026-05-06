@@ -1,0 +1,26 @@
+Candidate: early_return.py
+
+Task:
+이 코드에 차단된 이메일 도메인(BLOCKED_DOMAINS) 검증을 추가하려면 수정해야 할 위치를 최소한으로 나열하세요. 코드는 수정하지 말고 JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+def register_user(email, age, country):
+    if "@" not in email:
+        return {"ok": False, "error": "invalid email"}
+    if not (13 <= age <= 120):
+        return {"ok": False, "error": "invalid age"}
+    if country not in ALLOWED_COUNTRIES:
+        return {"ok": False, "error": "invalid country"}
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}
+

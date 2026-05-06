@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "검증과 도메인 로직이 분리된 외부 validate 스타일입니다. validate() 헬퍼가 모든 rule을 raise로 검사하고, register_user는 입력을 신뢰하며, handle()이 진입점에서 두 단계를 조합합니다. 검증 변경은 validate() 안에서만 일어나고, 새 파라미터 추가는 validate/register_user/handle 세 곳의 시그니처를 모두 바꿔야 한다는 비용이 있습니다. Edge case는 빈 email이 @ 검사를 통과하는 것, 그리고 register_user를 직접 호출하면 validation이 건너뛰어진다는 점입니다.",
+  "confidence": 0.9
+}

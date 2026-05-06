@@ -1,0 +1,8 @@
+{
+  "target_locations": [
+    {"symbol": "register_user", "reason": "이메일 검증 if 블록 옆에 도메인 차단 검사를 추가"},
+    {"symbol": "ALLOWED_COUNTRIES", "reason": "동일한 모듈 상수 패턴으로 BLOCKED_DOMAINS 정의"}
+  ],
+  "answer": "register_user 안의 email if 블록 다음에 BLOCKED_DOMAINS 검사를 추가하고, 모듈 상단에 BLOCKED_DOMAINS 상수를 정의하세요.",
+  "confidence": 0.9
+}

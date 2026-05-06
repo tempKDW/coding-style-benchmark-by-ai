@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "5단계가 각각 별도 함수(validate, price, ship, tax, pay)로 분리되어 dict를 받아 새 키를 추가한 새 dict를 반환하는 chained flow 스타일입니다. process_order는 10개 params를 받아 stage helper를 순차 호출하며, 데이터 전달은 immutable한 dict 확장({**prev, ...new})으로 이뤄집니다. 각 stage는 자신의 입력 stage가 어떤 키를 보장해야 하는지 implicit합니다. Edge case: dict 키 누락 시 KeyError, helper 시그니처와 process_order 호출부 인자 매칭 실수, payment 단계만 다른 모양의 응답 dict를 반환해 dict 흐름이 깨지는 점.",
+  "confidence": 0.9
+}

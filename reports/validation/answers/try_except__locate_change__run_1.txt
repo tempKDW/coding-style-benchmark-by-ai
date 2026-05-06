@@ -1,0 +1,8 @@
+{
+  "target_locations": [
+    {"symbol": "_check_email", "reason": "기존 이메일 검증 헬퍼에 도메인 차단 검사 추가"},
+    {"symbol": "ALLOWED_COUNTRIES", "reason": "BLOCKED_DOMAINS 상수를 같은 위치에 정의"}
+  ],
+  "answer": "_check_email 안에 BLOCKED_DOMAINS 검사를 추가하거나 _check_blocked_domain 헬퍼를 새로 만들고 register_user의 try 블록 안에서 호출하세요. 모듈 상단에 BLOCKED_DOMAINS 상수를 정의합니다.",
+  "confidence": 0.9
+}

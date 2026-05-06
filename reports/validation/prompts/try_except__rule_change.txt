@@ -1,0 +1,41 @@
+Candidate: try_except.py
+
+Task:
+허용 나이 범위를 13~120에서 18~99로 좁히세요. 다른 검증(이메일, country)은 그대로 유지해야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+class ValidationError(Exception):
+    pass
+
+
+def _check_email(email):
+    if "@" not in email:
+        raise ValidationError("invalid email")
+
+
+def _check_age(age):
+    if not (13 <= age <= 120):
+        raise ValidationError("invalid age")
+
+
+def _check_country(country):
+    if country not in ALLOWED_COUNTRIES:
+        raise ValidationError("invalid country")
+
+
+def register_user(email, age, country):
+    try:
+        _check_email(email)
+        _check_age(age)
+        _check_country(country)
+    except ValidationError as exc:
+        return {"ok": False, "error": str(exc)}
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}
+

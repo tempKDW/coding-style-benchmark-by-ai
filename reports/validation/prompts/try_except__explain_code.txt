@@ -1,0 +1,45 @@
+Candidate: try_except.py
+
+Task:
+이 코드의 검증 흐름, 검증 규칙이 추가/변경되는 지점, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+class ValidationError(Exception):
+    pass
+
+
+def _check_email(email):
+    if "@" not in email:
+        raise ValidationError("invalid email")
+
+
+def _check_age(age):
+    if not (13 <= age <= 120):
+        raise ValidationError("invalid age")
+
+
+def _check_country(country):
+    if country not in ALLOWED_COUNTRIES:
+        raise ValidationError("invalid country")
+
+
+def register_user(email, age, country):
+    try:
+        _check_email(email)
+        _check_age(age)
+        _check_country(country)
+    except ValidationError as exc:
+        return {"ok": False, "error": str(exc)}
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}
+

@@ -1,0 +1,32 @@
+Candidate: discount_if_else.py
+
+Task:
+이 코드에 BLACK_FRIDAY 할인 정책을 추가하려면 수정해야 할 위치를 최소한으로 나열하세요. 코드는 수정하지 말고 JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def calculate_discount(price, user_type, coupon_amount=0):
+    discount = 0
+
+    if user_type == "VIP":
+        discount = price * 0.15
+    elif user_type == "NEW":
+        discount = price * 0.05
+
+    if coupon_amount:
+        discount += coupon_amount
+
+    return discount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return price - discount
+

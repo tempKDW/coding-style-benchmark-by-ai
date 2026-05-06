@@ -1,0 +1,26 @@
+class Account:
+    def __init__(self, id, balance, frozen=False, min_balance=0):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+        self.min_balance = min_balance
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance - amount < self.min_balance:
+            raise ValueError("insufficient")
+        self.balance -= amount
+
+    def freeze(self, reason):
+        self.frozen = True
+
+
+def transfer(from_account, to_account, amount):
+    from_account.withdraw(amount)
+    to_account.deposit(amount)

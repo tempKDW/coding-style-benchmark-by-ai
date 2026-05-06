@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Account 클래스가 데이터 컨테이너 역할만 하는 anemic domain + service 레이어 패턴입니다. deposit/withdraw/freeze/transfer 같은 동작은 모두 module-level free function으로 분리되어 있고 첫 인자로 account를 받는 형태입니다. 단일 도메인 동작과 cross-aggregate 워크플로우(transfer)가 같은 레벨에서 자연스럽게 표현되는 게 강점이고, 발견성은 IDE 자동완성보다 grep에 의존합니다. flow는 caller가 명시적으로 함수를 골라 호출. Edge case: free function이라 invariant(frozen 검사)가 호출자가 잊을 수 있고 deposit/withdraw 양쪽에 frozen 검사가 중복, account.balance 직접 mutation을 외부에서 막을 방법이 없음, transfer가 한쪽 withdraw 성공 후 deposit 실패 시 부분 실행 위험 (트랜잭션 부재).",
+  "confidence": 0.9
+}

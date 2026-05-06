@@ -1,0 +1,1 @@
+{"target_locations": [{"symbol": "calculate_discount", "reason": "policy-specific discount branches are applied here"}], "answer": "flow, policy, edge case를 함수 한 곳에서 확인할 수 있습니다.", "confidence": 0.8}

@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "5단계가 단일 ctx 딕셔너리를 mutate하며 누적하는 pipeline 스타일입니다. process_order에서 10개 params로 ctx를 초기화하고, validate→price→ship→tax→pay 순서로 ctx를 점진 변경, 마지막 pay만 최종 응답 dict로 변환합니다. 데이터 전달은 공유 ctx 사이드 이펙트로 이뤄집니다. 실수하기 쉬운 edge case: ctx 키 오타로 KeyError, mutation으로 인한 stage 호출 순서 강결합, ctx에 추가된 키가 다른 stage에서 의도치 않게 사용될 수 있음, idempotency_key처럼 ctx에 들어있지만 실제로 사용되지 않는 키.",
+  "confidence": 0.9
+}

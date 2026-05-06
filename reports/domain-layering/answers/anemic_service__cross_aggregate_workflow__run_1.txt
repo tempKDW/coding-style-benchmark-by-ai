@@ -1,0 +1,42 @@
+from dataclasses import dataclass
+
+
+@dataclass
+class Account:
+    id: str
+    balance: int
+    frozen: bool = False
+
+
+def deposit(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    account.balance += amount
+    return account
+
+
+def withdraw(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    if account.balance < amount:
+        raise ValueError("insufficient")
+    account.balance -= amount
+    return account
+
+
+def freeze(account, reason):
+    account.frozen = True
+    return account
+
+
+def transfer(from_account, to_account, amount):
+    withdraw(from_account, amount)
+    deposit(to_account, amount)
+    return from_account, to_account
+
+
+def transfer_with_fee(from_account, to_account, amount, fee_account, fee):
+    withdraw(from_account, amount + fee)
+    deposit(to_account, amount)
+    deposit(fee_account, fee)
+    return from_account, to_account, fee_account

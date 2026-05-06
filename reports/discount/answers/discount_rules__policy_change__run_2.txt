@@ -1,0 +1,16 @@
+DISCOUNT_RATES = {
+    "VIP": 0.20,
+    "NEW": 0.10,
+}
+
+
+def calculate_discount(price, user_type, coupon_amount=0):
+    rate = DISCOUNT_RATES.get(user_type, 0)
+    discount = price * rate
+    discount += min(coupon_amount, 5000)
+    return discount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return max(price - discount, 0)
