@@ -1,0 +1,49 @@
+Candidate: post_validation_block.py
+
+Task:
+user.preferred_channel이 'EMAIL', 'Email' 같은 대소문자 변형으로 들어와도 ALLOWED_CHANNELS와 매칭되도록 버그를 고치세요. 비교 시 lowercase 변환을 사용하고, 최종 channel 값은 lowercase로 저장됩니다. preferred_channel이 None이거나 비어 있으면 기존 fallback 동작을 유지합니다. 다른 단계는 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user."""
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    # === 알고리즘 설명 ===
+    # 권한 검사를 통과한 이후의 처리 단계는 다음 4단계로 구성된다.
+    #   (a) template render: priority == "high" 이면 body 앞에 "[urgent] " prefix.
+    #   (b) channel select: high -> push (강제). 그 외에는 user.preferred_channel
+    #       이 ALLOWED_CHANNELS 안에 있으면 그것을 사용하고, 아니면 priority 별
+    #       fallback (low -> sms, normal -> email).
+    #   (c) dispatch: 실제 외부 호출은 mock 처리. {"sent": True, ...} 반환.
+    #   (d) logging: 성공 경로에서도 audit log에 channel/kind/ok 를 append.
+    # 권한 실패 경로(상단)에서도 log append를 수행한다는 점에 주의.
+    # =====================
+
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
+

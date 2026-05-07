@@ -1,0 +1,61 @@
+Candidate: header_full.py
+
+Task:
+이 코드의 5단계 알림 발송 흐름, 각 단계가 코드와 설명(docstring/주석)에서 어떻게 표현되는지, 규칙을 변경할 때 코드와 설명 사이의 동기화 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user across the right channel.
+
+    Args:
+        user: object with `notifications_enabled` (bool), `preferred_channel`
+            (str or None), `notification_log` (list).
+        message: payload string.
+        kind: notification category (e.g. "billing", "marketing", "security").
+        priority: one of "high", "normal", "low".
+
+    Returns:
+        dict with keys {"ok", "channel", "body"}. On failure "ok" is False
+        and "error" carries the reason; "channel" is None.
+
+    Notes:
+        Pipeline: permission -> render -> channel select -> dispatch -> log.
+        Priority "high" forces "push" regardless of preferred_channel; other
+        priorities honour user.preferred_channel when it is in
+        ALLOWED_CHANNELS, falling back to "email" (normal) or "sms" (low).
+        The log entry is appended even on permission failure for audit.
+    """
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
+

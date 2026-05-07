@@ -1,0 +1,49 @@
+Candidate: split_inline.py
+
+Task:
+이 코드의 5단계 알림 발송 흐름, 각 단계가 코드와 설명(docstring/주석)에서 어떻게 표현되는지, 규칙을 변경할 때 코드와 설명 사이의 동기화 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user."""
+    # step 1: permission check — disabled users still get an audit log entry
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    # step 1b: kind whitelist (billing / marketing / security only)
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    # step 2: template render — high priority gets an "[urgent] " prefix
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    # step 3: channel select — high forces push; otherwise honour preferred_channel
+    # if it is in ALLOWED_CHANNELS, else fall back by priority (low->sms, else email)
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    # step 4: dispatch (mocked here; real impl would hit a provider SDK)
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    # step 5: logging — append outcome for audit (success path)
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
+

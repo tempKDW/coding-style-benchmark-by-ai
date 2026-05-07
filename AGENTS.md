@@ -19,7 +19,7 @@
 | `domain_layering` | `examples-domain-layering/` | anemic+service vs rich domain vs hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×) |
 | `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴) |
 | `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음 |
-| `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안. **subagent 검증(reports/docstring-position-subagent)**: explain_code 일괄 -14.7점(term-aware self-bias 증거 — 메인이 expected_terms 의식해 키워드 포함), feature_add×split_inline +8 lines(가설 정렬 의심). 순위는 동일 — header_full > split_inline > post |
+| `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안. **subagent 검증**: explain_code 일괄 -14.7점(term-aware self-bias 증거), feature_add×split_inline +8 lines(가설 정렬 의심). **anonymize+subagent 검증**: split_inline explain_code 100점 회복(다른 둘은 변화 없음) → **vocabulary anchoring 발견**(이름 'split_inline'이 LLM 답변에서 'docstring' 어휘를 회피하게 함). 순위 변화: main/sub는 header_full 1위, sub+anon은 split_inline 1위 — 이름 hint가 결과 자체를 흔듦 |
 | `attribute_access` | `examples-attribute-access/` | hasattr+getattr (string) vs dot+try/except vs getattr(default) | rename 가설 깨짐 — 세 후보 모두 4 lines (hasattr_getattr는 1줄 패턴이라 통째 교체로 끝남, string 매치 함정은 정확성 차원이라 changed_lines로 안 잡힘). feature_add는 dot_try_except 7 lines로 가장 비쌈(다른 둘 4의 1.75×, try/except verbosity). 점수는 dot_try_except 92.64 1위지만 절대 변경량은 getattr_default 최소(rule 5/feature 4/rename 4) — diff_minimality 비율 함정 재확인 |
 
 전체 등록: `llm_code_benchmark/tasks.py`의 `SCENARIOS` / `SCENARIO_EXAMPLES` 딕셔너리.
@@ -61,7 +61,13 @@ self-bias는 메인 세션이 가설·expected_terms·이전 결과를 알고 �
 - dispatch 후 메인 세션이 `--score-existing`로 채점, 결과 해석.
 - **한계**: 같은 Claude 모델군이라 family-bias 잔존 ([Play Favorites, arXiv:2508.06709](https://arxiv.org/abs/2508.06709)). 진짜 분리는 cross-model(GPT/Gemini) 호출 단계.
 
-검증 산출물 위치: `reports/docstring-position-subagent/` (main 답변과 동일 prompts, 다른 answers).
+검증 산출물 위치:
+- `reports/docstring-position-subagent/` — main 답변과 동일 prompts, subagent 답변
+- `reports/docstring-position-anonymized/` — candidate 이름을 `style_a/b/c`로 random shuffle한 prompts + subagent 답변. `_mapping.json`에 매핑 보존
+
+### 추가 self-bias 형태 — Vocabulary anchoring by candidate name
+
+anonymize+subagent 검증에서 발견: candidate 파일명(`split_inline`, `header_full` 등)이 LLM 답변의 어휘 선택을 frame 함. `split_inline` 이름을 본 subagent는 explain 답변에서 "docstring" 단어를 의식적으로 회피해 expected_terms 매치 실패 → 점수 깎임. 이름을 `style_a`로 가리면 코드 보고 자연스럽게 "docstring" 포함 → 만점 회복. 직관적 self-bias("이름 알면 가설 정렬")와 반대 방향이지만 동일하게 측정 결과를 왜곡함. mitigation: 새 시나리오의 candidate 이름은 가설을 직접 시사하지 않는 의미-중립 코드(`style_a` 등) 또는 도메인 무관 단어 권장. 단, 사람 가독성을 위해 매핑은 별도 문서로 보존.
 
 ## 새 시나리오 추가 워크플로우
 

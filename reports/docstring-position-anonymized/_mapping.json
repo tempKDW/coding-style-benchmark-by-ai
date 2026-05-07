@@ -1,0 +1,5 @@
+{
+  "split_inline": "style_a",
+  "header_full": "style_b",
+  "post_validation_block": "style_c"
+}

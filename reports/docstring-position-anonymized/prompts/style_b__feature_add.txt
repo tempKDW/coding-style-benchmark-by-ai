@@ -1,0 +1,57 @@
+Candidate: style_b.py
+
+Task:
+권한 검사 직후, template render 이전에 quiet_hours 게이팅 단계를 추가하세요. send_notification에 새 파라미터 now_hour (0~23 정수)를 추가하고, user.quiet_hours가 (start, end) 튜플이며 now_hour가 그 범위 안이면 priority가 'high'가 아닌 한 발송을 막습니다. 막힌 경우 notification_log에 {'channel': None, 'kind': kind, 'ok': False} append 후 {'ok': False, 'error': 'quiet_hours', 'channel': None, 'body': None} 반환합니다. 범위가 자정을 가로지르는 경우(start > end)도 올바르게 처리하세요. 이 파일의 docstring/주석 등 설명도 새 단계를 반영하도록 갱신하세요. 다른 단계(template, channel, dispatch, logging) 로직은 그대로 유지합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user across the right channel.
+
+    Args:
+        user: object with `notifications_enabled` (bool), `preferred_channel`
+            (str or None), `notification_log` (list).
+        message: payload string.
+        kind: notification category (e.g. "billing", "marketing", "security").
+        priority: one of "high", "normal", "low".
+
+    Returns:
+        dict with keys {"ok", "channel", "body"}. On failure "ok" is False
+        and "error" carries the reason; "channel" is None.
+
+    Notes:
+        Pipeline: permission -> render -> channel select -> dispatch -> log.
+        Priority "high" forces "push" regardless of preferred_channel; other
+        priorities honour user.preferred_channel when it is in
+        ALLOWED_CHANNELS, falling back to "email" (normal) or "sms" (low).
+        The log entry is appended even on permission failure for audit.
+    """
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
+
