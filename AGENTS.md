@@ -100,22 +100,56 @@ python3 compare_runs.py <run_dir1> <run_dir2> [<run_dir3> ...]
 
 **해석**: 본 벤치마크의 메인 세션 결과는 평균 **+3~5점 인플레이션**을 가정하고 읽어야 합니다. score 차이가 5점 미만이면 self-bias 노이즈 안일 확률이 큽니다. 후보 간 진짜 차이를 보려면 항상 subagent dispatch 결과로 비교하세요. anonymize는 cell-level 비정상치 진단용으로만 가치 있고 시나리오-level mitigation으로는 불필요.
 
-## 새 시나리오 추가 워크플로우
+## 새 시나리오 추가 워크플로우 (표준)
 
-1. **후보 파일 작성**: `examples-<name>/` 에 같은 도메인의 N개 후보 `.py`. 같은 시그니처·같은 관찰 동작 유지 (fairness).
+self-bias mitigation 검증(docstring_position + attribute_access cross-scenario)으로 확정된 운영 룰. 시나리오당 약 1~2시간.
 
-2. **태스크 정의**: `tasks.py` 에 `<NAME>_TASKS: tuple[Task, ...]` 추가. 보통 5개 구성:
+1. **후보 파일 작성 — `style_a/b/c` 의미-중립 명명**:
+   - `examples-<name>/style_a.py`, `style_b.py`, `style_c.py` (필요시 `style_d.py`).
+   - 같은 시그니처·같은 관찰 동작 유지 (fairness). 동일 입력으로 호출해 동등성 검증 권장.
+   - 사람이 읽을 의미적 이름은 `docs/scenario-mappings.md` 의 "New scenarios" 표에 한 줄 추가.
+   - **금지**: 의미적 이름을 파일명·함수명·코드 안에 노출 (vocabulary anchoring 함정).
+
+2. **태스크 정의**: `tasks.py` 에 `<NAME>_TASKS: tuple[Task, ...]` 추가. 5개 구성:
    - 1~2개: control task (모든 후보가 비슷하게 잘함)
    - 1~2개: 차이를 노출시키는 핵심 가설 task
    - 1개: `explain_code` (analysis)
+   - **expected_terms 주의**: 영문 키워드를 강제하면 메인 세션이 의식적으로 포함해 self-bias 인플레이션 발생 (+3~5점, p<0.05 입증). 자연스럽게 등장할 단어만 선택.
 
 3. **시나리오 등록**: `SCENARIOS`, `SCENARIO_EXAMPLES` 딕셔너리에 키 추가.
 
-4. **dry-run → answers 작성(subagent dispatch 권장) → score-existing** (위 핵심 워크플로우).
+4. **프롬프트 생성**:
+   ```bash
+   python3 benchmark.py --scenario <name> --dry-run --out reports/<name>
+   ```
 
-5. **결과 분석** — `report.md`의 점수 + 별도로 `changed_lines` 매트릭스를 콘솔에 찍어 가설 검증. self-bias 검증을 위해 `python3 compare_runs.py <main> <subagent>` 으로 통계 검정.
+5. **답변 작성 — subagent dispatch (의무)**:
+   `Agent` tool, `subagent_type=general-purpose` 로 dispatch. 프롬프트는 `scripts/SUBAGENT_PROMPT.md` 템플릿의 `<SCENARIO>` 를 실제 시나리오 디렉터리 이름으로 치환해 사용. **메인 세션이 직접 답변하지 말 것** — self-bias +3~5점 인플레이션 통계 입증.
 
-6. **commit + push**: 후보 파일, `tasks.py`, `reports/<name>/` 모두 commit.
+6. **채점**:
+   ```bash
+   python3 benchmark.py --scenario <name> --score-existing --good-use-cases --out reports/<name>
+   ```
+
+7. **결과 분석**:
+   - `report.md` 점수 + `scores.json` 의 `changed_lines` 매트릭스 콘솔 출력해 가설 검증.
+   - 점수 차이 5점 미만은 self-bias 노이즈 안 (89~91 범위).
+   - 강한 가설 검증이 필요하면 메인 세션 답변도 별도 디렉터리에 작성 후 `python3 compare_runs.py reports/<name> reports/<name>-main` 으로 self-bias 진단.
+
+8. **AGENTS.md 시나리오 인덱스 갱신**: 한 줄 추가, 핵심 발견 요약.
+
+9. **commit + push**: `examples-<name>/`, `tasks.py`, `reports/<name>/`, `docs/scenario-mappings.md` 모두 commit.
+
+### Legacy 시나리오 self-bias 진단 (선택)
+
+기존 시나리오(의미적 candidate 이름)를 cross-check 하려면:
+```bash
+python3 scripts/anonymize_prompts.py reports/<name> reports/<name>-anon
+# subagent dispatch on reports/<name>-anon (5단계 참고)
+python3 scripts/deanonymize_answers.py reports/<name>-anon
+python3 benchmark.py --scenario <name> --score-existing --out reports/<name>-anon
+python3 compare_runs.py reports/<name> reports/<name>-anon
+```
 
 ## Task 데이터 구조
 
