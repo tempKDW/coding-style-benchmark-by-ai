@@ -19,6 +19,7 @@
 | `domain_layering` | `examples-domain-layering/` | anemic+service vs rich domain vs hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×) |
 | `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴) |
 | `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음 |
+| `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안 — 단정 어려움 |
 
 전체 등록: `llm_code_benchmark/tasks.py`의 `SCENARIOS` / `SCENARIO_EXAMPLES` 딕셔너리.
 

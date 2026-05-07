@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Notification flow is a five-step pipeline. The docstring is a single one-liner, but a multi-line `# === 알고리즘 설명 ===` comment block sits between the validation gate and the rest of the body, listing stages (a) template render, (b) channel select (high -> push, else preferred_channel if in ALLOWED_CHANNELS, else priority-based fallback to sms or email), (c) dispatch, (d) logging in prose. Permission and kind validation are documented implicitly by the code at the top, with the disabled path still appending an audit log entry. Changing a rule typically means updating the prose in the algorithm block plus the corresponding code below — two locations close to each other. Synchronisation cost is moderate: the prose can drift if someone edits the code without re-reading the block. Edge cases: disabled path still touches notification_log; preferred_channel matched case-sensitively so 'EMAIL' silently falls through; priority outside {high, normal, low} silently routes to 'email'.",
+  "confidence": 0.85
+}

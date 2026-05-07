@@ -1,0 +1,46 @@
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user across the right channel.
+
+    Args:
+        user: object with `notifications_enabled` (bool), `preferred_channel`
+            (str or None), `notification_log` (list).
+        message: payload string.
+        kind: notification category (e.g. "billing", "marketing", "security").
+        priority: one of "high", "normal", "low".
+
+    Returns:
+        dict with keys {"ok", "channel", "body"}. On failure "ok" is False
+        and "error" carries the reason; "channel" is None.
+
+    Notes:
+        Pipeline: permission -> render -> channel select -> dispatch -> log.
+        Priority "high" forces "push" regardless of preferred_channel; other
+        priorities honour user.preferred_channel when it is in
+        ALLOWED_CHANNELS, falling back to "email" (normal) or "sms" (low).
+        The log entry is appended even on permission failure for audit.
+    """
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}

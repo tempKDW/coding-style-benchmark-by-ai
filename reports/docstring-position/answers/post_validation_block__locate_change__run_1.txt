@@ -1,0 +1,9 @@
+{
+  "target_locations": [
+    "algorithm comment block lines (a) prefix rule and (b) channel select rule",
+    "prefix assignment (add `priority == 'critical'` branch)",
+    "channel select if/elif chain (add `priority == 'critical' -> push`)"
+  ],
+  "answer": "For post_validation_block a single multi-line comment block above the body documents stages (a) prefix and (b) channel select in prose, so both lines in that block need updating. Two short code edits follow below. The 1-line docstring is essentially uninformative and does not need to change. Three logical locations.",
+  "confidence": 0.85
+}

@@ -1,0 +1,9 @@
+{
+  "target_locations": [
+    "step 2 inline comment + prefix assignment (add `critical -> [CRITICAL] ` branch)",
+    "step 3 inline comment + channel select chain (add `critical -> push`, document preferred_channel override)",
+    "docstring one-liner (priority enumeration if you want to be thorough)"
+  ],
+  "answer": "For split_inline the rule documentation is co-located with each step — the step 2 comment documents the prefix rule, the step 3 comment documents the channel-select rule. Adding a new priority therefore touches both inline comments alongside their code. The 1-line docstring barely says anything, so it's only mildly affected. Three logical locations.",
+  "confidence": 0.8
+}

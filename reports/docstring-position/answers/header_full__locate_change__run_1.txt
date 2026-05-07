@@ -1,0 +1,9 @@
+{
+  "target_locations": [
+    "docstring Args (priority enumeration) and Notes (priority/channel rules) — both in the single header docstring",
+    "prefix assignment block (add a `[CRITICAL] ` arm)",
+    "channel select if/elif chain (add `priority == 'critical' -> push`, ignore preferred_channel)"
+  ],
+  "answer": "For header_full the priority enumeration and channel-selection rules are centralised in the docstring (Args + Notes), so both must be updated together — that is one cohesive documentation location. The actual code change touches the prefix assignment and the channel select chain. Three logical locations total.",
+  "confidence": 0.85
+}

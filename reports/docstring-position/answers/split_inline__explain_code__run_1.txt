@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Notification flow is a five-step pipeline labelled inline with `# step N` comments: step 1 (permission + kind whitelist; the disabled path still appends an audit log entry), step 2 (template render with high-priority [urgent] prefix), step 3 (channel select: high -> push, otherwise preferred_channel if it is in ALLOWED_CHANNELS, fallback by priority to sms or email), step 4 (mocked dispatch), step 5 (audit log on the success path). Each step has its own inline comment co-located with the code, so changing a rule means updating both the code and the adjacent comment in the same place. The docstring is a single one-liner. Synchronisation cost is moderate because rule documentation is distributed across the function body rather than centralised, but each comment is short and right next to the code it describes — drift is local and easy to spot. Edge cases: disabled path still touches notification_log; preferred_channel matched case-sensitively so 'EMAIL' silently falls through; priority outside {high, normal, low} silently routes to 'email'.",
+  "confidence": 0.85
+}

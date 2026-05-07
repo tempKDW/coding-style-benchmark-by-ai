@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "Notification flow is a five-step pipeline: (1) permission check (notifications_enabled + kind whitelist; the disabled path still appends an audit log entry), (2) template render (high-priority body gets an [urgent] prefix), (3) channel select (high forces push; otherwise preferred_channel if it is in ALLOWED_CHANNELS, else priority-based fallback to sms or email), (4) dispatch (mocked here), (5) logging (audit append on the success path). All of this is described in a single header docstring with Args, Returns and Notes sections, so any rule change requires updating one cohesive prose block in addition to a few code lines. Synchronisation cost is low when adding a new arg (one Args entry) and moderate when changing rules because the Notes block enumerates priority and channel logic in prose that can drift from the code. Edge cases worth noting: the disabled path still touches notification_log; preferred_channel is matched as-is so case variants like 'EMAIL' silently fall through; a priority value outside {high, normal, low} silently routes to 'email'.",
+  "confidence": 0.85
+}

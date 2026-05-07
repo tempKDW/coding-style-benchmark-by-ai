@@ -427,6 +427,83 @@ PIPELINE_STYLE_TASKS: tuple[Task, ...] = (
 )
 
 
+DOCSTRING_POSITION_TASKS: tuple[Task, ...] = (
+    Task(
+        id="locate_change",
+        name="Locate channel rule change points",
+        kind="analysis",
+        prompt=(
+            "이 코드에서 channel 선택 규칙(예: 새 priority 'critical' 추가 시 강제 채널 결정)을 "
+            "수정하려면 코드와 설명(docstring/주석) 양쪽에서 손대야 할 위치를 최소한으로 나열하세요. "
+            "코드는 수정하지 말고 JSON만 반환하세요."
+        ),
+        expected_terms=("channel", "priority", "docstring"),
+        max_target_locations=4,
+    ),
+    Task(
+        id="rule_change",
+        name="Channel/priority rule change (with description sync)",
+        kind="patch",
+        prompt=(
+            "priority 규칙을 다음과 같이 변경하세요: 'high'는 그대로 push 강제, 'low'의 fallback은 "
+            "sms 대신 email로 바꾸고, 새 priority 'critical'을 추가해 'critical'이면 user.preferred_channel을 "
+            "무시하고 무조건 push이며 body 앞에 '[CRITICAL] ' prefix를 붙입니다. "
+            "이 파일에 존재하는 모든 설명(docstring, inline 주석, 주석 블록 등)도 새 규칙과 일치하도록 함께 갱신해야 합니다. "
+            "권한/kind 검증, logging은 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("critical", "[CRITICAL]", "push"),
+        max_target_locations=5,
+        edge_markers=("notifications_enabled", "notification_log", "ALLOWED_CHANNELS"),
+    ),
+    Task(
+        id="feature_add",
+        name="Add quiet_hours gating step",
+        kind="patch",
+        prompt=(
+            "권한 검사 직후, template render 이전에 quiet_hours 게이팅 단계를 추가하세요. "
+            "send_notification에 새 파라미터 now_hour (0~23 정수)를 추가하고, user.quiet_hours가 "
+            "(start, end) 튜플이며 now_hour가 그 범위 안이면 priority가 'high'가 아닌 한 발송을 막습니다. "
+            "막힌 경우 notification_log에 {'channel': None, 'kind': kind, 'ok': False} append 후 "
+            "{'ok': False, 'error': 'quiet_hours', 'channel': None, 'body': None} 반환합니다. "
+            "범위가 자정을 가로지르는 경우(start > end)도 올바르게 처리하세요. "
+            "이 파일의 docstring/주석 등 설명도 새 단계를 반영하도록 갱신하세요. "
+            "다른 단계(template, channel, dispatch, logging) 로직은 그대로 유지합니다. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("quiet_hours", "now_hour", "high"),
+        max_target_locations=5,
+        edge_markers=("notifications_enabled", "preferred_channel", "notification_log"),
+    ),
+    Task(
+        id="edge_bugfix",
+        name="Fix preferred_channel case-sensitivity bug",
+        kind="patch",
+        prompt=(
+            "user.preferred_channel이 'EMAIL', 'Email' 같은 대소문자 변형으로 들어와도 "
+            "ALLOWED_CHANNELS와 매칭되도록 버그를 고치세요. 비교 시 lowercase 변환을 사용하고, "
+            "최종 channel 값은 lowercase로 저장됩니다. preferred_channel이 None이거나 비어 있으면 "
+            "기존 fallback 동작을 유지합니다. 다른 단계는 그대로 유지하세요. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("lower", "preferred_channel"),
+        max_target_locations=2,
+        edge_markers=("ALLOWED_CHANNELS", "notification_log"),
+    ),
+    Task(
+        id="explain_code",
+        name="Explain notification flow",
+        kind="analysis",
+        prompt=(
+            "이 코드의 5단계 알림 발송 흐름, 각 단계가 코드와 설명(docstring/주석)에서 어떻게 표현되는지, "
+            "규칙을 변경할 때 코드와 설명 사이의 동기화 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. "
+            "JSON만 반환하세요."
+        ),
+        expected_terms=("flow", "docstring", "channel"),
+        max_target_locations=0,
+    ),
+)
+
+
 SCENARIOS: dict[str, tuple[Task, ...]] = {
     "discount": TASKS,
     "validation": VALIDATION_TASKS,
@@ -434,6 +511,7 @@ SCENARIOS: dict[str, tuple[Task, ...]] = {
     "domain_layering": DOMAIN_LAYERING_TASKS,
     "enum_vs_str": ENUM_VS_STR_TASKS,
     "pipeline_style": PIPELINE_STYLE_TASKS,
+    "docstring_position": DOCSTRING_POSITION_TASKS,
 }
 
 
@@ -444,4 +522,5 @@ SCENARIO_EXAMPLES: dict[str, str] = {
     "domain_layering": "examples-domain-layering",
     "enum_vs_str": "examples-enum-vs-str",
     "pipeline_style": "examples-pipeline-style",
+    "docstring_position": "examples-docstring-position",
 }

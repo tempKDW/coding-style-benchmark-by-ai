@@ -1,0 +1,61 @@
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority, now_hour):
+    """Send a notification to a user across the right channel.
+
+    Args:
+        user: object with `notifications_enabled` (bool), `preferred_channel`
+            (str or None), `notification_log` (list), `quiet_hours`
+            (tuple (start, end) or None).
+        message: payload string.
+        kind: notification category (e.g. "billing", "marketing", "security").
+        priority: one of "high", "normal", "low".
+        now_hour: current hour as int (0~23) used for quiet_hours gating.
+
+    Returns:
+        dict with keys {"ok", "channel", "body"}. On failure "ok" is False
+        and "error" carries the reason; "channel" is None.
+
+    Notes:
+        Pipeline: permission -> quiet_hours -> render -> channel select -> dispatch -> log.
+        After permission, quiet_hours gating blocks dispatch when now_hour
+        falls inside user.quiet_hours == (start, end). The range may wrap
+        around midnight (start > end). Priority "high" bypasses the gate.
+        Priority "high" forces "push" regardless of preferred_channel; other
+        priorities honour user.preferred_channel when it is in
+        ALLOWED_CHANNELS, falling back to "email" (normal) or "sms" (low).
+        The log entry is appended even on permission failure for audit.
+    """
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    if priority != "high" and user.quiet_hours is not None:
+        start, end = user.quiet_hours
+        if start <= end:
+            in_quiet = start <= now_hour < end
+        else:
+            in_quiet = now_hour >= start or now_hour < end
+        if in_quiet:
+            user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+            return {"ok": False, "error": "quiet_hours", "channel": None, "body": None}
+
+    prefix = "[urgent] " if priority == "high" else ""
+    body = prefix + message
+
+    if priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    elif priority == "low":
+        channel = "sms"
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
