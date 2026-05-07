@@ -2,7 +2,7 @@
 
 같은 도메인을 여러 코딩 스타일로 표현해두고, **LLM이 어느 스타일을 가장 정확하고 최소 변경으로 다루는지** 측정하는 작은 벤치마크입니다. 비교 축은 LLM이 아니라 **코드 스타일**이며, LLM은 평가자(작업 수행자) 역할입니다.
 
-> 작업 가이드(시나리오 추가 워크플로우, Task 구조, 자주 하는 실수 등)는 [`CLAUDE.md`](CLAUDE.md) 참조.
+> 작업 가이드(시나리오 추가 워크플로우, Task 구조, 자주 하는 실수 등)는 [`AGENTS.md`](AGENTS.md) 참조.
 
 ## 시나리오
 
@@ -40,7 +40,7 @@ python3 benchmark.py --scenario <name> --dry-run --out reports/<name>
 python3 benchmark.py --scenario <name> --score-existing --good-use-cases --out reports/<name>
 ```
 
-상세는 [`CLAUDE.md`의 "핵심 워크플로우"](CLAUDE.md#핵심-워크플로우--claude를-평가자로-쓰는---score-existing) 참조.
+상세는 [`AGENTS.md`의 "핵심 워크플로우"](AGENTS.md#핵심-워크플로우--claude를-평가자로-쓰는---score-existing) 참조.
 
 ### 실 LLM 호출
 
@@ -86,4 +86,4 @@ ANTHROPIC_API_KEY=... python3 benchmark.py --scenario validation --runs 3 --out 
 
 ## 새 시나리오 추가
 
-[`CLAUDE.md`의 "새 시나리오 추가 워크플로우"](CLAUDE.md#새-시나리오-추가-워크플로우) 참조.
+[`AGENTS.md`의 "새 시나리오 추가 워크플로우"](AGENTS.md#새-시나리오-추가-워크플로우) 참조.
