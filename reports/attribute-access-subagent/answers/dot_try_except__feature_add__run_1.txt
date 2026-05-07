@@ -1,0 +1,42 @@
+def build_user_summary(user):
+    summary = {}
+    try:
+        summary["display_name"] = user.display_name or "Anonymous"
+    except AttributeError:
+        summary["display_name"] = "Anonymous"
+    try:
+        if user.email:
+            summary["email"] = user.email
+    except AttributeError:
+        pass
+    try:
+        summary["avatar_url"] = user.avatar_url or "/default-avatar.png"
+    except AttributeError:
+        summary["avatar_url"] = "/default-avatar.png"
+    try:
+        summary["bio"] = user.bio
+    except AttributeError:
+        pass
+    try:
+        summary["location"] = user.location or "Unknown"
+    except AttributeError:
+        summary["location"] = "Unknown"
+    try:
+        if user.last_login:
+            summary["last_login"] = user.last_login.isoformat()
+    except AttributeError:
+        pass
+    try:
+        summary["plan_tier"] = user.plan_tier or "free"
+    except AttributeError:
+        summary["plan_tier"] = "free"
+    try:
+        if user.phone_number:
+            phone = user.phone_number.strip()
+            if phone:
+                if not phone.startswith("+"):
+                    phone = "+" + phone
+                summary["phone_number"] = phone
+    except AttributeError:
+        pass
+    return summary

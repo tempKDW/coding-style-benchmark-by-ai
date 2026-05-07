@@ -1,0 +1,5 @@
+{
+  "dot_try_except": "style_a",
+  "hasattr_getattr": "style_b",
+  "getattr_default": "style_c"
+}

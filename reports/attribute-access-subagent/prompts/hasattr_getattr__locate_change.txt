@@ -1,0 +1,40 @@
+Candidate: hasattr_getattr.py
+
+Task:
+이 코드에서 user 객체의 새 nullable 속성(예: phone_number)을 추가해 summary에 노출하려면 어디를 어떻게 손대야 하는지 위치를 최소한으로 나열하세요. 코드는 수정하지 말고 JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def build_user_summary(user):
+    summary = {}
+    if hasattr(user, "display_name") and getattr(user, "display_name"):
+        summary["display_name"] = getattr(user, "display_name")
+    else:
+        summary["display_name"] = "Anonymous"
+    if hasattr(user, "email") and getattr(user, "email"):
+        summary["email"] = getattr(user, "email")
+    if hasattr(user, "avatar_url") and getattr(user, "avatar_url"):
+        summary["avatar_url"] = getattr(user, "avatar_url")
+    else:
+        summary["avatar_url"] = "/default-avatar.png"
+    if hasattr(user, "bio"):
+        summary["bio"] = getattr(user, "bio")
+    if hasattr(user, "location") and getattr(user, "location"):
+        summary["location"] = getattr(user, "location")
+    else:
+        summary["location"] = "Unknown"
+    if hasattr(user, "last_login") and getattr(user, "last_login"):
+        summary["last_login"] = getattr(user, "last_login").isoformat()
+    if hasattr(user, "plan_tier") and getattr(user, "plan_tier"):
+        summary["plan_tier"] = getattr(user, "plan_tier")
+    else:
+        summary["plan_tier"] = "free"
+    return summary
+

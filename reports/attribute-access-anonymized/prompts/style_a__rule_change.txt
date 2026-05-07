@@ -1,0 +1,44 @@
+Candidate: style_a.py
+
+Task:
+bio 처리 규칙을 변경하세요. 현재는 bio 속성이 존재하면 값(None/빈문자열 포함)을 그대로 summary에 넣습니다. 이를 다음과 같이 바꾸세요: bio가 존재하지 않거나, None이거나, 공백만 있거나, 빈 문자열이면 summary에 bio 키를 넣지 않습니다. 그 외 경우에는 strip() 한 결과를 넣습니다. 다른 필드 처리는 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def build_user_summary(user):
+    summary = {}
+    try:
+        summary["display_name"] = user.display_name or "Anonymous"
+    except AttributeError:
+        summary["display_name"] = "Anonymous"
+    try:
+        if user.email:
+            summary["email"] = user.email
+    except AttributeError:
+        pass
+    try:
+        summary["avatar_url"] = user.avatar_url or "/default-avatar.png"
+    except AttributeError:
+        summary["avatar_url"] = "/default-avatar.png"
+    try:
+        summary["bio"] = user.bio
+    except AttributeError:
+        pass
+    try:
+        summary["location"] = user.location or "Unknown"
+    except AttributeError:
+        summary["location"] = "Unknown"
+    try:
+        if user.last_login:
+            summary["last_login"] = user.last_login.isoformat()
+    except AttributeError:
+        pass
+    try:
+        summary["plan_tier"] = user.plan_tier or "free"
+    except AttributeError:
+        summary["plan_tier"] = "free"
+    return summary
+

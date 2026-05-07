@@ -1,0 +1,1 @@
+{"target_locations": [{"symbol": "build_user_summary", "reason": "함수 본문에 새 한 줄(walrus 패턴) 을 추가해야 함"}, {"symbol": "return summary", "reason": "return 직전이 새 필드 추가에 가장 자연스러운 위치"}], "answer": "build_user_summary 함수 안, plan_tier 줄과 return summary 사이에 `if phone_number := getattr(user, 'phone_number', None):` 한 블록(2~4줄) 만 추가하면 됩니다. 다른 줄은 손대지 않습니다.", "confidence": 0.9}

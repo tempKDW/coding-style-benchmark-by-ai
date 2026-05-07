@@ -1,0 +1,27 @@
+Candidate: getattr_default.py
+
+Task:
+이 코드의 nullable attribute 접근 패턴, 누락(missing)·falsy 값 처리, default fallback, 새 필드 추가 시 변경 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def build_user_summary(user):
+    summary = {"display_name": getattr(user, "display_name", None) or "Anonymous"}
+    if email := getattr(user, "email", None):
+        summary["email"] = email
+    summary["avatar_url"] = getattr(user, "avatar_url", None) or "/default-avatar.png"
+    if hasattr(user, "bio"):
+        summary["bio"] = user.bio
+    summary["location"] = getattr(user, "location", None) or "Unknown"
+    if last_login := getattr(user, "last_login", None):
+        summary["last_login"] = last_login.isoformat()
+    summary["plan_tier"] = getattr(user, "plan_tier", None) or "free"
+    return summary
+

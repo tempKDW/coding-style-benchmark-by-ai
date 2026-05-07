@@ -1,0 +1,36 @@
+Candidate: style_b.py
+
+Task:
+user.phone_number 라는 새 nullable 속성을 추가해 summary에 노출하세요. 값이 없거나, None 이거나, 빈 문자열이면 summary에 phone_number 키를 넣지 않습니다. 값이 있으면 양 끝 공백을 제거하고, 이미 '+'로 시작하지 않으면 '+' 접두사를 붙여 summary['phone_number']에 저장합니다. 다른 필드 처리는 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def build_user_summary(user):
+    summary = {}
+    if hasattr(user, "display_name") and getattr(user, "display_name"):
+        summary["display_name"] = getattr(user, "display_name")
+    else:
+        summary["display_name"] = "Anonymous"
+    if hasattr(user, "email") and getattr(user, "email"):
+        summary["email"] = getattr(user, "email")
+    if hasattr(user, "avatar_url") and getattr(user, "avatar_url"):
+        summary["avatar_url"] = getattr(user, "avatar_url")
+    else:
+        summary["avatar_url"] = "/default-avatar.png"
+    if hasattr(user, "bio"):
+        summary["bio"] = getattr(user, "bio")
+    if hasattr(user, "location") and getattr(user, "location"):
+        summary["location"] = getattr(user, "location")
+    else:
+        summary["location"] = "Unknown"
+    if hasattr(user, "last_login") and getattr(user, "last_login"):
+        summary["last_login"] = getattr(user, "last_login").isoformat()
+    if hasattr(user, "plan_tier") and getattr(user, "plan_tier"):
+        summary["plan_tier"] = getattr(user, "plan_tier")
+    else:
+        summary["plan_tier"] = "free"
+    return summary
+

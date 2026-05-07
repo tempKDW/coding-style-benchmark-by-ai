@@ -1,0 +1,48 @@
+Candidate: style_a.py
+
+Task:
+이 코드의 nullable attribute 접근 패턴, 누락(missing)·falsy 값 처리, default fallback, 새 필드 추가 시 변경 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def build_user_summary(user):
+    summary = {}
+    try:
+        summary["display_name"] = user.display_name or "Anonymous"
+    except AttributeError:
+        summary["display_name"] = "Anonymous"
+    try:
+        if user.email:
+            summary["email"] = user.email
+    except AttributeError:
+        pass
+    try:
+        summary["avatar_url"] = user.avatar_url or "/default-avatar.png"
+    except AttributeError:
+        summary["avatar_url"] = "/default-avatar.png"
+    try:
+        summary["bio"] = user.bio
+    except AttributeError:
+        pass
+    try:
+        summary["location"] = user.location or "Unknown"
+    except AttributeError:
+        summary["location"] = "Unknown"
+    try:
+        if user.last_login:
+            summary["last_login"] = user.last_login.isoformat()
+    except AttributeError:
+        pass
+    try:
+        summary["plan_tier"] = user.plan_tier or "free"
+    except AttributeError:
+        summary["plan_tier"] = "free"
+    return summary
+

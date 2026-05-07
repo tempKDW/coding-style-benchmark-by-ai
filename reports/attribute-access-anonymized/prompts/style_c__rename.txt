@@ -1,0 +1,23 @@
+Candidate: style_c.py
+
+Task:
+user.last_login 속성과 summary['last_login'] 키를 모두 last_seen_at 로 rename 하세요. 동작(없거나 falsy 면 omit, 있으면 .isoformat() 호출)은 그대로 유지합니다. 다른 필드는 손대지 마세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def build_user_summary(user):
+    summary = {"display_name": getattr(user, "display_name", None) or "Anonymous"}
+    if email := getattr(user, "email", None):
+        summary["email"] = email
+    summary["avatar_url"] = getattr(user, "avatar_url", None) or "/default-avatar.png"
+    if hasattr(user, "bio"):
+        summary["bio"] = user.bio
+    summary["location"] = getattr(user, "location", None) or "Unknown"
+    if last_login := getattr(user, "last_login", None):
+        summary["last_login"] = last_login.isoformat()
+    summary["plan_tier"] = getattr(user, "plan_tier", None) or "free"
+    return summary
+
