@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "중간 결과를 직접 nested call로 전달하는 functional pipeline 스타일. parse(read_log(path))처럼 단계가 한 줄로 압축되며, 두 곳에서 재사용되는 events만 어쩔 수 없이 변수로 명명(filter_errors와 compute_stats 양쪽 입력). 가독성 측면에서 flow가 한 줄에 표현되어 선언적이지만 nested depth가 깊어지면 읽기 어려움. 변경 비용은 단계 추가가 한 줄 modify, 그러나 새 재사용 값이 생기면 inline 패턴이 깨지고 부분 추출이 강제됨. Edge case: nested expression 내부에 print/breakpoint를 끼워 디버깅하기 어려움, 동일 inline call(예: filter_errors(events))을 두 번 호출하면 같은 작업이 반복되어 성능/사이드 이펙트 위험.",
+  "confidence": 0.9
+}

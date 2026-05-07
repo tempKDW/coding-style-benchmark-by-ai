@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "도메인적으로 의미 있는 entity(events, error_events)만 명명하고 기술적 transform은 inline하는 pragmatic pipeline 스타일. parse(read_log(path))는 inline하지만 events와 error_events는 도메인 사전의 1차 시민이라 변수로 노출. 가독성 측면에서 의미 있는 단계만 시각적으로 강조되고 잡음(raw 같은 임시 변수) 제거. 변경 비용은 단계 추가가 inline_chain 수준, 재사용 값은 이미 명명되어 with_locals 수준의 자유도. flow는 caller가 도메인 어휘로 코드를 읽기 가장 쉬움. Edge case: '도메인 entity인지' 판단의 주관성으로 코드 리뷰에서 이름 부여 여부에 의견 차이, 시간이 지나면서 어떤 값이 entity로 승격되어야 할지 흔들릴 수 있음, 빈 events에서 error_rate가 0.0으로 떨어지는 분기 누락 위험은 동일.",
+  "confidence": 0.9
+}

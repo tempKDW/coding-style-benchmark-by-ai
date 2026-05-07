@@ -356,12 +356,84 @@ ENUM_VS_STR_TASKS: tuple[Task, ...] = (
 )
 
 
+PIPELINE_STYLE_TASKS: tuple[Task, ...] = (
+    Task(
+        id="change_step",
+        name="Change filter threshold",
+        kind="patch",
+        prompt=(
+            "filter_errors의 기준을 status >= 500에서 status >= 400으로 변경하세요. "
+            "다른 함수와 process orchestration은 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("400",),
+        max_target_locations=1,
+        edge_markers=("read_log", "parse", "compute_stats", "format_report"),
+    ),
+    Task(
+        id="add_step",
+        name="Insert normalize_timestamps step",
+        kind="patch",
+        prompt=(
+            "parse와 filter_errors 사이에 normalize_timestamps(events) 단계를 추가하세요. "
+            "normalize_timestamps는 각 event의 timestamp를 ISO 8601 형식으로 변환하는 함수로 "
+            "이 파일 안에 정의합니다 (간단히 string 그대로 반환해도 OK). "
+            "process 함수에서 호출되어야 합니다. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("normalize_timestamps",),
+        max_target_locations=2,
+        edge_markers=("filter_errors", "compute_stats", "format_report"),
+    ),
+    Task(
+        id="remove_step",
+        name="Remove compute_stats step",
+        kind="patch",
+        prompt=(
+            "compute_stats 단계를 제거하고, format_report가 events와 error_events를 직접 받아 "
+            "동일한 'total=... errors=... rate=...' 문자열을 만들도록 변경하세요. "
+            "compute_stats 함수 정의 자체도 제거합니다. "
+            "process는 수정된 format_report를 호출해야 합니다. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("format_report", "events"),
+        max_target_locations=3,
+        edge_markers=("filter_errors", "parse"),
+    ),
+    Task(
+        id="add_intermediate_use",
+        name="Add stat that re-uses error_events",
+        kind="patch",
+        prompt=(
+            "compute_stats에 새 인자 recent_error_count를 추가하세요. "
+            "recent_error_count는 error_events 중 timestamp가 '2024' 이상인 event의 개수입니다. "
+            "process 함수에서 이 값을 계산해 compute_stats로 전달합니다. "
+            "format_report도 stats에 'recent_error_count' 키가 있으면 출력에 포함합니다 "
+            "(없으면 기존 동작 유지). 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("recent_error_count", "2024"),
+        max_target_locations=4,
+        edge_markers=("filter_errors", "parse", "error_rate"),
+    ),
+    Task(
+        id="explain_code",
+        name="Explain pipeline orchestration style",
+        kind="analysis",
+        prompt=(
+            "이 코드의 pipeline orchestration 스타일(중간 변수 명명 vs inline pass), "
+            "단계 간 데이터 흐름, 가독성과 변경 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. "
+            "JSON만 반환하세요."
+        ),
+        expected_terms=("flow", "pipeline"),
+        max_target_locations=0,
+    ),
+)
+
+
 SCENARIOS: dict[str, tuple[Task, ...]] = {
     "discount": TASKS,
     "validation": VALIDATION_TASKS,
     "function_shape": FUNCTION_SHAPE_TASKS,
     "domain_layering": DOMAIN_LAYERING_TASKS,
     "enum_vs_str": ENUM_VS_STR_TASKS,
+    "pipeline_style": PIPELINE_STYLE_TASKS,
 }
 
 
@@ -371,4 +443,5 @@ SCENARIO_EXAMPLES: dict[str, str] = {
     "function_shape": "examples-function-shape",
     "domain_layering": "examples-domain-layering",
     "enum_vs_str": "examples-enum-vs-str",
+    "pipeline_style": "examples-pipeline-style",
 }

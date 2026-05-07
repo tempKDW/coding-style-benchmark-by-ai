@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "명시적 중간 변수 명명 스타일의 5단계 pipeline orchestration. read_log → parse → filter_errors → compute_stats → format_report flow가 각 단계 결과를 지역 변수(raw, events, error_events, stats)로 받아 다음 단계로 전달합니다. 가독성 측면에서 각 단계의 결과가 도메인 의미를 가진 이름으로 명시되어 디버깅과 중간 검사가 쉬움. 변경 비용은 단계 추가/제거 시 새 라인 추가, 재사용 추가 시 기존 변수 그대로 활용 가능. Edge case: 빈 lines로 events가 빈 리스트가 되면 error_rate가 0.0으로 떨어지고 분기 누락 가능, raw 같은 의미 없는 임시 변수가 인지 부담을 늘림, 동일 변수명을 reassign(예: events = normalize(events))하면 원본 추적이 어려움.",
+  "confidence": 0.9
+}
