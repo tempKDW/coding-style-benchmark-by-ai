@@ -19,7 +19,7 @@
 | `domain_layering` | `examples-domain-layering/` | anemic+service vs rich domain vs hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×) |
 | `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴) |
 | `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음 |
-| `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안 — 단정 어려움 |
+| `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안. **subagent 검증(reports/docstring-position-subagent)**: explain_code 일괄 -14.7점(term-aware self-bias 증거 — 메인이 expected_terms 의식해 키워드 포함), feature_add×split_inline +8 lines(가설 정렬 의심). 순위는 동일 — header_full > split_inline > post |
 | `attribute_access` | `examples-attribute-access/` | hasattr+getattr (string) vs dot+try/except vs getattr(default) | rename 가설 깨짐 — 세 후보 모두 4 lines (hasattr_getattr는 1줄 패턴이라 통째 교체로 끝남, string 매치 함정은 정확성 차원이라 changed_lines로 안 잡힘). feature_add는 dot_try_except 7 lines로 가장 비쌈(다른 둘 4의 1.75×, try/except verbosity). 점수는 dot_try_except 92.64 1위지만 절대 변경량은 getattr_default 최소(rule 5/feature 4/rename 4) — diff_minimality 비율 함정 재확인 |
 
 전체 등록: `llm_code_benchmark/tasks.py`의 `SCENARIOS` / `SCENARIO_EXAMPLES` 딕셔너리.
@@ -41,6 +41,8 @@ API 키 없이 진행하는 패턴 (실 워크플로우):
    - `kind="patch"` → 수정된 전체 코드 (markdown fence 없이)
    - `kind="analysis"` → JSON `{"target_locations": [...], "answer": "...", "confidence": 0.x}`
 
+   **권장: 답변 작성을 메인 세션에서 분리해 subagent에 dispatch** (self-bias mitigation, 아래 섹션 참고).
+
 3. **채점** (LLM 호출 없음):
    ```bash
    python3 benchmark.py --scenario <name> --score-existing --good-use-cases --out reports/<name>
@@ -48,6 +50,18 @@ API 키 없이 진행하는 패턴 (실 워크플로우):
    → `reports/<name>/{report.md, good_use_cases.md, scores.json, scores.csv}` 생성
 
 4. **분석** — `scores.json` 의 `changed_lines` 매트릭스를 별도로 출력해 비교 (점수보다 강건한 신호).
+
+## Self-bias mitigation — 가설 작성자와 답변 작성자 세션 분리
+
+self-bias는 메인 세션이 가설·expected_terms·이전 결과를 알고 답변을 작성할 때 발생합니다. 이 벤치마크의 docstring_position 검증에서 **explain_code 점수가 일괄 14.7점 인플레이션**된 직접 증거가 잡혔습니다 (메인이 expected_terms를 의식해 키워드를 의도적으로 포함). 이를 줄이는 운영 룰:
+
+- 답변 작성은 메인 세션이 직접 하지 말고 `Agent` tool의 `general-purpose` subagent에 dispatch.
+- subagent dispatch 프롬프트에 노출 **금지**: 가설 텍스트, AGENTS.md 시나리오 인덱스 표, 이전 시나리오 결과·점수, expected_terms 목록.
+- subagent 권한: `reports/<scenario>/prompts/*.txt` 읽기, `reports/<scenario>/answers/*.txt` 쓰기. 그 외 파일 참조 금지를 dispatch 프롬프트에 명시.
+- dispatch 후 메인 세션이 `--score-existing`로 채점, 결과 해석.
+- **한계**: 같은 Claude 모델군이라 family-bias 잔존 ([Play Favorites, arXiv:2508.06709](https://arxiv.org/abs/2508.06709)). 진짜 분리는 cross-model(GPT/Gemini) 호출 단계.
+
+검증 산출물 위치: `reports/docstring-position-subagent/` (main 답변과 동일 prompts, 다른 answers).
 
 ## 새 시나리오 추가 워크플로우
 
@@ -60,7 +74,7 @@ API 키 없이 진행하는 패턴 (실 워크플로우):
 
 3. **시나리오 등록**: `SCENARIOS`, `SCENARIO_EXAMPLES` 딕셔너리에 키 추가.
 
-4. **dry-run → answers 작성 → score-existing** (위 핵심 워크플로우).
+4. **dry-run → answers 작성(subagent dispatch 권장) → score-existing** (위 핵심 워크플로우).
 
 5. **결과 분석** — `report.md`의 점수 + 별도로 `changed_lines` 매트릭스를 콘솔에 찍어 가설 검증.
 

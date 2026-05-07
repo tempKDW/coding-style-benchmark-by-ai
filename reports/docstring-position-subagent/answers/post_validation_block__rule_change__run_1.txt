@@ -1,0 +1,45 @@
+ALLOWED_CHANNELS = ("email", "sms", "push")
+
+
+def send_notification(user, message, kind, priority):
+    """Send a notification to a user."""
+    if not user.notifications_enabled:
+        user.notification_log.append({"channel": None, "kind": kind, "ok": False})
+        return {"ok": False, "error": "disabled", "channel": None, "body": None}
+    if kind not in ("billing", "marketing", "security"):
+        return {"ok": False, "error": "invalid kind", "channel": None, "body": None}
+
+    # === 알고리즘 설명 ===
+    # 권한 검사를 통과한 이후의 처리 단계는 다음 4단계로 구성된다.
+    #   (a) template render: priority == "critical" 이면 body 앞에 "[CRITICAL] "
+    #       prefix, priority == "high" 이면 body 앞에 "[urgent] " prefix.
+    #   (b) channel select: critical -> push (강제, preferred_channel 무시),
+    #       high -> push (강제). 그 외에는 user.preferred_channel 이
+    #       ALLOWED_CHANNELS 안에 있으면 그것을 사용하고, 아니면 priority 별
+    #       fallback (low -> email, normal -> email).
+    #   (c) dispatch: 실제 외부 호출은 mock 처리. {"sent": True, ...} 반환.
+    #   (d) logging: 성공 경로에서도 audit log에 channel/kind/ok 를 append.
+    # 권한 실패 경로(상단)에서도 log append를 수행한다는 점에 주의.
+    # =====================
+
+    if priority == "critical":
+        prefix = "[CRITICAL] "
+    elif priority == "high":
+        prefix = "[urgent] "
+    else:
+        prefix = ""
+    body = prefix + message
+
+    if priority == "critical":
+        channel = "push"
+    elif priority == "high":
+        channel = "push"
+    elif user.preferred_channel in ALLOWED_CHANNELS:
+        channel = user.preferred_channel
+    else:
+        channel = "email"
+
+    sent = {"sent": True, "channel": channel, "body": body}
+
+    user.notification_log.append({"channel": channel, "kind": kind, "ok": sent["sent"]})
+    return {"ok": True, "channel": channel, "body": body}
