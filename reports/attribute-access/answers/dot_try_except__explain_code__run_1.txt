@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "이 코드는 user 객체의 7개 nullable attribute 를 dot operator 로 직접 접근하고, AttributeError 가 발생하면 except 절에서 default 적용 또는 omit 한다. 각 필드는 try/except 블록 3-5줄로 표현된다. fallback default 가 있는 필드(display_name, avatar_url, location, plan_tier)는 except 절에서 default 를 채우고, omit 필드(email, bio, last_login)는 except 가 pass 한다. 새 필드 추가 비용은 새 try/except 블록 한 덩어리. 변경 비용 함정은 (1) try 블록이 두 종류 분기(missing 과 falsy)를 한 자리에서 처리해 의도가 흐려진다는 점, (2) 의도치 않은 AttributeError 가 try 안에서 발생하면 silently 삼켜져 디버깅이 어렵다는 점 — 특히 last_login.isoformat() 같은 chain 호출에서 isoformat 이 없으면 AttributeError 가 같은 except 에 잡힌다. dot 접근이라 string literal 매치 부담은 없어 rename 에는 비교적 강한 편. edge case: bio 처럼 falsy 분기가 없는 필드는 None 이나 '' 도 그대로 summary 에 들어간다.",
+  "confidence": 0.85
+}

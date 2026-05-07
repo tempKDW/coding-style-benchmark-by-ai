@@ -1,0 +1,7 @@
+{
+  "target_locations": [
+    "build_user_summary 함수 안, plan_tier try/except 블록 다음에 새 try/except 블록 추가 (try 본문에서 user.phone_number 접근 후 summary 에 할당, except AttributeError 절은 default 가 필요하면 채우고 아니면 pass)"
+  ],
+  "answer": "dot_try_except 패턴은 각 nullable 필드마다 try/except AttributeError 블록 한 덩어리(3-5줄)이다. phone_number 추가는 plan_tier 블록 다음에 같은 모양의 try/except 한 단위를 이어 붙이는 것으로 충분하다. attribute 이름은 dot 으로 한 번만 등장하므로 string 매치 누락 risk 가 없는 대신, try 안에서 부수적 AttributeError 가 silently 삼켜질 risk 는 동일하게 따라온다.",
+  "confidence": 0.85
+}

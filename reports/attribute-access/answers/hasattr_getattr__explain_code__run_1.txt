@@ -1,0 +1,5 @@
+{
+  "target_locations": [],
+  "answer": "이 코드는 user 객체의 7개 nullable attribute(display_name, email, avatar_url, bio, location, last_login, plan_tier)를 hasattr+getattr 조합의 string 기반 reflection 으로 접근한다. 각 필드는 'if hasattr(user, X) and getattr(user, X): summary[X] = getattr(user, X) else: summary[X] = default' 형태의 동일 패턴 4-5줄 블록을 반복한다. attribute 누락(missing)과 falsy 값(None, '')을 fallback default 로 동일하게 처리하고, default 가 없는 email/last_login 은 omit 한다. bio 만 hasattr 한 줄로 attribute 존재 여부만 보고 None 도 그대로 보존한다는 점이 특이. 새 필드 추가 비용은 새 4-5줄 블록 한 덩어리. 변경 비용 함정은 (1) 동일 attribute 이름이 한 블록 안에 string literal 로 3번 등장해 rename 시 모두 갱신해야 한다는 점, (2) hasattr 가 descriptor/property 의 부작용까지 트리거할 수 있다는 점, (3) default 값을 한 곳에 통일하기 어려워 마법 문자열('Anonymous', '/default-avatar.png', 'Unknown', 'free')이 분산된다는 점.",
+  "confidence": 0.85
+}

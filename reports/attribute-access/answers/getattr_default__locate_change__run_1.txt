@@ -1,0 +1,7 @@
+{
+  "target_locations": [
+    "build_user_summary 함수 안, plan_tier 처리 라인 다음에 phone_number 처리 1-2줄 추가 (default fallback 이 있으면 'summary[\"phone_number\"] = getattr(user, \"phone_number\", None) or default' 한 줄, omit 이면 walrus + truthy 가드 1-2줄)"
+  ],
+  "answer": "getattr_default 패턴은 각 nullable 필드를 1-3줄로 압축한다. phone_number 도 동일하게 한두 줄 추가하면 충분하며, 세 후보 중 가장 짧고 변경 위치가 적다. attribute 이름 'phone_number' 가 한 줄에 한 번(default fallback) 또는 두 번(walrus 본문 + 키) 등장.",
+  "confidence": 0.85
+}

@@ -20,6 +20,7 @@
 | `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴) |
 | `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음 |
 | `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안 — 단정 어려움 |
+| `attribute_access` | `examples-attribute-access/` | hasattr+getattr (string) vs dot+try/except vs getattr(default) | rename 가설 깨짐 — 세 후보 모두 4 lines (hasattr_getattr는 1줄 패턴이라 통째 교체로 끝남, string 매치 함정은 정확성 차원이라 changed_lines로 안 잡힘). feature_add는 dot_try_except 7 lines로 가장 비쌈(다른 둘 4의 1.75×, try/except verbosity). 점수는 dot_try_except 92.64 1위지만 절대 변경량은 getattr_default 최소(rule 5/feature 4/rename 4) — diff_minimality 비율 함정 재확인 |
 
 전체 등록: `llm_code_benchmark/tasks.py`의 `SCENARIOS` / `SCENARIO_EXAMPLES` 딕셔너리.
 

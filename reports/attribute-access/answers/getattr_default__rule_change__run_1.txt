@@ -1,0 +1,13 @@
+def build_user_summary(user):
+    summary = {"display_name": getattr(user, "display_name", None) or "Anonymous"}
+    if email := getattr(user, "email", None):
+        summary["email"] = email
+    summary["avatar_url"] = getattr(user, "avatar_url", None) or "/default-avatar.png"
+    bio_value = getattr(user, "bio", None)
+    if bio_value and bio_value.strip():
+        summary["bio"] = bio_value.strip()
+    summary["location"] = getattr(user, "location", None) or "Unknown"
+    if last_login := getattr(user, "last_login", None):
+        summary["last_login"] = last_login.isoformat()
+    summary["plan_tier"] = getattr(user, "plan_tier", None) or "free"
+    return summary

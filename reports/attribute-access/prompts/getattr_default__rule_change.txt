@@ -1,0 +1,23 @@
+Candidate: getattr_default.py
+
+Task:
+bio 처리 규칙을 변경하세요. 현재는 bio 속성이 존재하면 값(None/빈문자열 포함)을 그대로 summary에 넣습니다. 이를 다음과 같이 바꾸세요: bio가 존재하지 않거나, None이거나, 공백만 있거나, 빈 문자열이면 summary에 bio 키를 넣지 않습니다. 그 외 경우에는 strip() 한 결과를 넣습니다. 다른 필드 처리는 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def build_user_summary(user):
+    summary = {"display_name": getattr(user, "display_name", None) or "Anonymous"}
+    if email := getattr(user, "email", None):
+        summary["email"] = email
+    summary["avatar_url"] = getattr(user, "avatar_url", None) or "/default-avatar.png"
+    if hasattr(user, "bio"):
+        summary["bio"] = user.bio
+    summary["location"] = getattr(user, "location", None) or "Unknown"
+    if last_login := getattr(user, "last_login", None):
+        summary["last_login"] = last_login.isoformat()
+    summary["plan_tier"] = getattr(user, "plan_tier", None) or "free"
+    return summary
+

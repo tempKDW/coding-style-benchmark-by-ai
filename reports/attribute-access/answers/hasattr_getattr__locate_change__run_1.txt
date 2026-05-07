@@ -1,0 +1,8 @@
+{
+  "target_locations": [
+    "build_user_summary 함수 안, 마지막 필드(plan_tier) 처리 블록 다음에 새 'if hasattr(user, \"phone_number\") and getattr(user, \"phone_number\"): summary[\"phone_number\"] = getattr(user, \"phone_number\") else: ...' 패턴 한 블록(4-5줄) 추가",
+    "default fallback 이 필요하면 else 절에 default 값을 채우고, omit 한다면 else 절을 생략"
+  ],
+  "answer": "hasattr_getattr 패턴은 각 nullable 필드마다 hasattr/getattr 호출이 반복되는 동일 형태 4-5줄 블록을 늘어놓는다. 새 phone_number 추가는 같은 모양의 블록 한 덩어리를 plan_tier 다음에 이어 붙이는 것으로 충분하다. attribute 이름 'phone_number' 가 한 블록 안에 string literal 로 3번(hasattr 인자, getattr 인자 2회) 등장한다는 점을 의식해야 rename 시 누락이 없다.",
+  "confidence": 0.85
+}

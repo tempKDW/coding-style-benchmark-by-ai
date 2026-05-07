@@ -504,6 +504,75 @@ DOCSTRING_POSITION_TASKS: tuple[Task, ...] = (
 )
 
 
+ATTRIBUTE_ACCESS_TASKS: tuple[Task, ...] = (
+    Task(
+        id="locate_change",
+        name="Locate nullable attribute access points",
+        kind="analysis",
+        prompt=(
+            "이 코드에서 user 객체의 새 nullable 속성(예: phone_number)을 추가해 summary에 노출하려면 "
+            "어디를 어떻게 손대야 하는지 위치를 최소한으로 나열하세요. "
+            "코드는 수정하지 말고 JSON만 반환하세요."
+        ),
+        expected_terms=("attribute", "phone_number", "summary"),
+        max_target_locations=3,
+    ),
+    Task(
+        id="rule_change",
+        name="Treat empty bio as missing",
+        kind="patch",
+        prompt=(
+            "bio 처리 규칙을 변경하세요. 현재는 bio 속성이 존재하면 값(None/빈문자열 포함)을 그대로 summary에 넣습니다. "
+            "이를 다음과 같이 바꾸세요: bio가 존재하지 않거나, None이거나, 공백만 있거나, 빈 문자열이면 "
+            "summary에 bio 키를 넣지 않습니다. 그 외 경우에는 strip() 한 결과를 넣습니다. "
+            "다른 필드 처리는 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("bio", "strip"),
+        max_target_locations=2,
+        edge_markers=("display_name", "email", "avatar_url", "location", "last_login", "plan_tier"),
+    ),
+    Task(
+        id="feature_add",
+        name="Add nullable phone_number with normalization",
+        kind="patch",
+        prompt=(
+            "user.phone_number 라는 새 nullable 속성을 추가해 summary에 노출하세요. "
+            "값이 없거나, None 이거나, 빈 문자열이면 summary에 phone_number 키를 넣지 않습니다. "
+            "값이 있으면 양 끝 공백을 제거하고, 이미 '+'로 시작하지 않으면 '+' 접두사를 붙여 summary['phone_number']에 저장합니다. "
+            "다른 필드 처리는 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("phone_number", "+"),
+        max_target_locations=2,
+        edge_markers=("display_name", "avatar_url", "plan_tier"),
+    ),
+    Task(
+        id="rename",
+        name="Rename last_login to last_seen_at",
+        kind="patch",
+        prompt=(
+            "user.last_login 속성과 summary['last_login'] 키를 모두 last_seen_at 로 rename 하세요. "
+            "동작(없거나 falsy 면 omit, 있으면 .isoformat() 호출)은 그대로 유지합니다. "
+            "다른 필드는 손대지 마세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("last_seen_at",),
+        max_target_locations=3,
+        edge_markers=("display_name", "email", "avatar_url", "bio", "location", "plan_tier"),
+    ),
+    Task(
+        id="explain_code",
+        name="Explain nullable attribute handling",
+        kind="analysis",
+        prompt=(
+            "이 코드의 nullable attribute 접근 패턴, 누락(missing)·falsy 값 처리, default fallback, "
+            "새 필드 추가 시 변경 비용, 실수하기 쉬운 edge case를 간결하게 설명하세요. "
+            "JSON만 반환하세요."
+        ),
+        expected_terms=("attribute", "fallback", "default"),
+        max_target_locations=0,
+    ),
+)
+
+
 SCENARIOS: dict[str, tuple[Task, ...]] = {
     "discount": TASKS,
     "validation": VALIDATION_TASKS,
@@ -512,6 +581,7 @@ SCENARIOS: dict[str, tuple[Task, ...]] = {
     "enum_vs_str": ENUM_VS_STR_TASKS,
     "pipeline_style": PIPELINE_STYLE_TASKS,
     "docstring_position": DOCSTRING_POSITION_TASKS,
+    "attribute_access": ATTRIBUTE_ACCESS_TASKS,
 }
 
 
@@ -523,4 +593,5 @@ SCENARIO_EXAMPLES: dict[str, str] = {
     "enum_vs_str": "examples-enum-vs-str",
     "pipeline_style": "examples-pipeline-style",
     "docstring_position": "examples-docstring-position",
+    "attribute_access": "examples-attribute-access",
 }
