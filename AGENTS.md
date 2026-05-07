@@ -69,6 +69,24 @@ self-bias는 메인 세션이 가설·expected_terms·이전 결과를 알고 �
 
 anonymize+subagent 검증에서 발견: candidate 파일명(`split_inline`, `header_full` 등)이 LLM 답변의 어휘 선택을 frame 함. `split_inline` 이름을 본 subagent는 explain 답변에서 "docstring" 단어를 의식적으로 회피해 expected_terms 매치 실패 → 점수 깎임. 이름을 `style_a`로 가리면 코드 보고 자연스럽게 "docstring" 포함 → 만점 회복. 직관적 self-bias("이름 알면 가설 정렬")와 반대 방향이지만 동일하게 측정 결과를 왜곡함. mitigation: 새 시나리오의 candidate 이름은 가설을 직접 시사하지 않는 의미-중립 코드(`style_a` 등) 또는 도메인 무관 단어 권장. 단, 사람 가독성을 위해 매핑은 별도 문서로 보존.
 
+### 통계적 검정 — `compare_runs.py`
+
+두 run 이상의 `scores.json`을 paired permutation test + 95% bootstrap CI 로 비교합니다. 외부 의존(scipy/numpy) 없이 stdlib만 사용. n ≤ 16 일 때 2^n 사인플립 exhaustive enumeration이라 p-value는 정확값.
+
+```bash
+python3 compare_runs.py <run_dir1> <run_dir2> [<run_dir3> ...]
+```
+
+출력: 각 run의 mean ± 95% CI, baseline(첫 run) 대비 paired permutation p-value 및 paired Cohen's dz.
+
+**docstring_position 검증 결과 (n=15 cells)**:
+- main vs sub: score Δ=+3.34 p=0.019 (\*), dz=0.56 — **메인 세션의 self-bias 인플레이션이 통계적으로 유의**.
+- main vs sub+anon: score Δ=+2.29 p=0.039 (\*), dz=0.45 — 동일 방향, 약간 약함.
+- sub vs sub+anon: score Δ=-1.06 p=0.35 (ns) — **anonymize의 추가 효과는 비유의** (vocabulary anchoring은 cell-level 현상).
+- changed_lines는 모든 비교에서 p>0.14 — N=15에선 변별력 부족. "changed_lines가 점수보다 정직한 신호"는 self-bias robust 측면에선 맞지만 통계적 검출력은 약함.
+
+**해석**: 본 벤치마크의 메인 세션 결과는 평균 +2~3점 인플레이션을 가정하고 읽어야 합니다. score 차이가 5점 미만이면 self-bias 노이즈 안일 확률이 큽니다. 후보 간 진짜 차이를 보려면 항상 subagent dispatch 결과로 비교하세요.
+
 ## 새 시나리오 추가 워크플로우
 
 1. **후보 파일 작성**: `examples-<name>/` 에 같은 도메인의 N개 후보 `.py`. 같은 시그니처·같은 관찰 동작 유지 (fairness).
@@ -82,7 +100,7 @@ anonymize+subagent 검증에서 발견: candidate 파일명(`split_inline`, `hea
 
 4. **dry-run → answers 작성(subagent dispatch 권장) → score-existing** (위 핵심 워크플로우).
 
-5. **결과 분석** — `report.md`의 점수 + 별도로 `changed_lines` 매트릭스를 콘솔에 찍어 가설 검증.
+5. **결과 분석** — `report.md`의 점수 + 별도로 `changed_lines` 매트릭스를 콘솔에 찍어 가설 검증. self-bias 검증을 위해 `python3 compare_runs.py <main> <subagent>` 으로 통계 검정.
 
 6. **commit + push**: 후보 파일, `tasks.py`, `reports/<name>/` 모두 commit.
 
