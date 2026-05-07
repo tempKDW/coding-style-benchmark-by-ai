@@ -438,7 +438,7 @@ SCENARIOS: dict[str, tuple[Task, ...]] = {
 
 
 SCENARIO_EXAMPLES: dict[str, str] = {
-    "discount": "examples",
+    "discount": "examples-discount",
     "validation": "examples-validation",
     "function_shape": "examples-function-shape",
     "domain_layering": "examples-domain-layering",

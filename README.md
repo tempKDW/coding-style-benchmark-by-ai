@@ -1,61 +1,89 @@
-# LLM Maintainability Benchmark
+# Coding Style Benchmark by AI
 
-짧은 예시 코드를 여러 구현 스타일로 두고, LLM이 얼마나 쉽게 읽고 수정하는지 비교하는 작은 벤치마크입니다.
+같은 도메인을 여러 코딩 스타일로 표현해두고, **LLM이 어느 스타일을 가장 정확하고 최소 변경으로 다루는지** 측정하는 작은 벤치마크입니다. 비교 축은 LLM이 아니라 **코드 스타일**이며, LLM은 평가자(작업 수행자) 역할입니다.
 
-## 측정하는 5개 태스크
+> 작업 가이드(시나리오 추가 워크플로우, Task 구조, 자주 하는 실수 등)는 [`CLAUDE.md`](CLAUDE.md) 참조.
 
-- `locate_change`: 변경해야 할 위치 찾기
-- `policy_change`: 기존 정책 변경
-- `feature_add`: 새 정책 추가
-- `edge_bugfix`: edge case 버그 수정
-- `explain_code`: 코드 흐름과 변경 지점 설명
+## 시나리오
 
-## 실행
+| Scenario | 비교 대상 | 핵심 발견 |
+|---|---|---|
+| `discount` | if-else / rules-dict / strategy | (베이스라인) 짧은 코드에서는 점수 차이 작음 |
+| `validation` | early-return / try-except / 외부 validate | 외부 validate가 `feature_add`에서 14 lines (early 6의 2.3×) |
+| `function_shape` | monolithic / split_chain / split_pipeline / method_chain | split_chain이 cross-cutting param 추가에서 8 lines (mono 2의 4×) |
+| `domain_layering` | anemic+service / rich domain / hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×) |
+| `enum_vs_str` | bare strings / string constants / Enum | string_constants가 rename에서 함정 (8 lines) |
+| `pipeline_style` | with_locals / inline_chain / domain_locals | 차이 1 line 이내 — 가독성 문제, 마찰 비용 영향 없음 |
 
-프롬프트만 확인:
+각 시나리오는 같은 도메인을 여러 스타일로 표현한 후보 파일들과, 동일한 변경 task 셋(보통 5개)으로 구성됩니다.
 
-```bash
-python3 benchmark.py --dry-run
-```
+## 빠른 시작
 
-샘플 답변으로 리포트 생성:
-
-```bash
-python3 benchmark.py --sample
-```
-
-실제 LLM 호출 — 평가자(=작업을 수행하는 LLM)는 작업 환경에 맞춰 OpenAI 또는 Anthropic을 고를 수 있습니다. 비교의 축은 LLM이 아니라 `examples/` 안의 **코드 스타일**이며, provider는 단지 손에 잡힌 키에 맞춰 바꿔 쓰는 용도입니다.
-
-OpenAI 키가 있을 때 (Codex CLI 환경 등):
+### 프롬프트만 확인 (LLM 호출 없음)
 
 ```bash
-OPENAI_API_KEY=... python3 benchmark.py --model gpt-4.1-mini
+python3 benchmark.py --scenario validation --dry-run --out reports/validation
 ```
 
-Anthropic 키가 있을 때 (Claude Code 환경 등):
+### Claude를 평가자로 쓰기 (`--score-existing`, API 키 불필요)
+
+핵심 워크플로우 — Claude Code 등의 환경에서 답변을 직접 작성한 뒤 채점만 실행:
 
 ```bash
-ANTHROPIC_API_KEY=... python3 benchmark.py --model claude-opus-4-7
+# 1. 프롬프트 생성
+python3 benchmark.py --scenario <name> --dry-run --out reports/<name>
+
+# 2. reports/<name>/answers/<candidate>__<task>__run_1.txt 직접 작성
+#    (Claude가 각 prompt를 읽고 honest output 작성)
+
+# 3. 채점만 실행
+python3 benchmark.py --scenario <name> --score-existing --good-use-cases --out reports/<name>
 ```
 
-provider는 모델명 prefix로 자동 감지됩니다 (`gpt-`, `o1-`, `o3-`, `o4-` → openai / `claude-` → anthropic). 자동 감지가 어려운 경우 `--provider` 로 명시할 수 있습니다.
+상세는 [`CLAUDE.md`의 "핵심 워크플로우"](CLAUDE.md#핵심-워크플로우--claude를-평가자로-쓰는---score-existing) 참조.
 
-반복 실행 (같은 평가자로 노이즈를 줄이고 스타일별 점수 차이를 명확히 보고 싶을 때):
+### 실 LLM 호출
 
+OpenAI 키 사용 (Codex CLI 환경 등):
 ```bash
-ANTHROPIC_API_KEY=... python3 benchmark.py --model claude-sonnet-4-6 --runs 5
+OPENAI_API_KEY=... python3 benchmark.py --scenario validation --model gpt-4.1-mini --out reports/validation
 ```
 
-결과는 `reports/report.md`, `reports/scores.csv`, `reports/scores.json`에 생성됩니다.
+Anthropic 키 사용 (Claude Code 환경 등):
+```bash
+ANTHROPIC_API_KEY=... python3 benchmark.py --scenario validation --model claude-opus-4-7 --out reports/validation
+```
 
-## 점수 해석
+provider는 모델명 prefix로 자동 감지 (`gpt-`/`o1-`/`o3-`/`o4-` → openai, `claude-` → anthropic). 자동 감지가 어려우면 `--provider` 로 명시.
 
-총점은 100점 기준입니다.
+반복 실행으로 노이즈 줄이기:
+```bash
+ANTHROPIC_API_KEY=... python3 benchmark.py --scenario validation --runs 3 --out reports/validation
+```
 
-- 정답성: 40
-- 변경 위치 정확도: 20
-- diff 최소성: 15
-- edge case 보존: 15
-- 설명 품질: 10
+## 결과 해석
 
-짧은 코드에서는 성공/실패만으로 차이가 잘 드러나지 않기 때문에, 변경 라인 수, 변경 지점 수, 설명 품질 같은 마찰 비용을 함께 봅니다.
+각 시나리오의 `reports/<name>/` 에 다음이 생성됩니다:
+- `report.md` — 후보×task 점수 매트릭스
+- `good_use_cases.md` — 자동 분석 인사이트
+- `scores.{json,csv}` — 원시 점수
+- `prompts/`, `answers/` — 입출력 보존
+
+### 점수 가중치 (총 100)
+
+| 항목 | 가중 |
+|---|---:|
+| correctness | 40 |
+| location_precision | 20 |
+| diff_minimality | 15 |
+| edge_preservation | 15 |
+| explanation_quality | 10 |
+
+### 짚어둘 점
+
+- **`changed_lines`가 점수보다 더 정직한 신호.** 짧은 코드(20~50줄)에서 점수는 89±2 범위에 압축되어 차이가 잘 안 드러남. 직접 매트릭스 출력 권장.
+- 비교 축은 **스타일**. 같은 평가자(LLM)로 모든 스타일을 측정해야 fair.
+
+## 새 시나리오 추가
+
+[`CLAUDE.md`의 "새 시나리오 추가 워크플로우"](CLAUDE.md#새-시나리오-추가-워크플로우) 참조.
