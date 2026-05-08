@@ -1,0 +1,23 @@
+Candidate: style_b.py
+
+Task:
+channel 값 'qa'를 추가하세요. 'qa' channel은 'monitoring'을 반환합니다. 기존 'test'/'prod' 동작과 priority 기반 fallback은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def decide_route(channel: str, priority: int) -> str:
+    """Decide routing target by channel and priority."""
+    if channel == 'test':
+        return 'debug_only'
+    elif channel == 'prod':
+        return 'monitoring'
+    elif priority == 1:
+        return 'urgent'
+    elif priority == 2:
+        return 'fast'
+    else:
+        return 'standard'
+

@@ -1,0 +1,27 @@
+Candidate: style_a.py
+
+Task:
+이 코드의 분기 로직을 설명하세요. channel과 priority가 결정에 어떻게 작용하는지, 두 인자 간의 우선순위가 어떻게 인코딩되어 있는지 짚어주세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def decide_route(channel: str, priority: int) -> str:
+    """Decide routing target by channel and priority."""
+    if channel == 'test':
+        return 'debug_only'
+    elif channel == 'prod':
+        return 'monitoring'
+
+    if priority == 1:
+        return 'urgent'
+    elif priority == 2:
+        return 'fast'
+    return 'standard'
+

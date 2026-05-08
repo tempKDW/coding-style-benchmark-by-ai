@@ -1,0 +1,23 @@
+Candidate: style_a.py
+
+Task:
+channel 값 'test'를 'staging'으로 rename 하세요. 모든 등장 위치를 일관되게 변경합니다. 다른 분기와 반환값은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def decide_route(channel: str, priority: int) -> str:
+    """Decide routing target by channel and priority."""
+    if channel == 'test':
+        return 'debug_only'
+    elif channel == 'prod':
+        return 'monitoring'
+
+    if priority == 1:
+        return 'urgent'
+    elif priority == 2:
+        return 'fast'
+    return 'standard'
+
