@@ -573,6 +573,73 @@ ATTRIBUTE_ACCESS_TASKS: tuple[Task, ...] = (
 )
 
 
+IF_ELIF_CONTEXT_TASKS: tuple[Task, ...] = (
+    Task(
+        id="explain_branches",
+        name="Explain branching logic",
+        kind="analysis",
+        prompt=(
+            "이 코드의 분기 로직을 설명하세요. channel과 priority가 결정에 어떻게 작용하는지, "
+            "두 인자 간의 우선순위가 어떻게 인코딩되어 있는지 짚어주세요. JSON만 반환하세요."
+        ),
+        expected_terms=("channel", "priority"),
+        max_target_locations=2,
+    ),
+    Task(
+        id="rename_channel",
+        name="Rename 'test' channel to 'staging'",
+        kind="patch",
+        prompt=(
+            "channel 값 'test'를 'staging'으로 rename 하세요. 모든 등장 위치를 일관되게 변경합니다. "
+            "다른 분기와 반환값은 그대로 유지하세요. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("staging",),
+        max_target_locations=1,
+        edge_markers=("prod", "monitoring", "urgent", "fast", "standard"),
+    ),
+    Task(
+        id="add_channel_value",
+        name="Add 'qa' channel routing",
+        kind="patch",
+        prompt=(
+            "channel 값 'qa'를 추가하세요. 'qa' channel은 'monitoring'을 반환합니다. "
+            "기존 'test'/'prod' 동작과 priority 기반 fallback은 그대로 유지하세요. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("qa", "monitoring"),
+        max_target_locations=1,
+        edge_markers=("debug_only", "urgent", "fast", "standard"),
+    ),
+    Task(
+        id="swap_precedence",
+        name="Swap precedence — priority before channel",
+        kind="patch",
+        prompt=(
+            "우선순위를 변경하세요. priority == 1 인 경우는 channel 값과 무관하게 'urgent', "
+            "priority == 2 인 경우는 'fast'를 먼저 반환해야 합니다. "
+            "그 외(priority가 1/2가 아닌 경우)에는 channel == 'test'면 'debug_only', "
+            "channel == 'prod'면 'monitoring', 어디에도 해당 안 되면 'standard'입니다. "
+            "수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("priority", "channel"),
+        max_target_locations=2,
+        edge_markers=("debug_only", "monitoring", "urgent", "fast", "standard"),
+    ),
+    Task(
+        id="add_compound_rule",
+        name="Add compound rule for (prod, priority=1)",
+        kind="patch",
+        prompt=(
+            "channel == 'prod' 이면서 priority == 1 인 경우는 'critical_alert'을 반환하도록 변경하세요. "
+            "다른 입력에 대한 결과는 모두 동일해야 합니다. 수정된 전체 코드만 반환하세요."
+        ),
+        expected_terms=("critical_alert",),
+        max_target_locations=1,
+        edge_markers=("debug_only", "monitoring", "urgent", "fast", "standard"),
+    ),
+)
+
+
 SCENARIOS: dict[str, tuple[Task, ...]] = {
     "discount": TASKS,
     "validation": VALIDATION_TASKS,
@@ -582,6 +649,7 @@ SCENARIOS: dict[str, tuple[Task, ...]] = {
     "pipeline_style": PIPELINE_STYLE_TASKS,
     "docstring_position": DOCSTRING_POSITION_TASKS,
     "attribute_access": ATTRIBUTE_ACCESS_TASKS,
+    "if_elif_context": IF_ELIF_CONTEXT_TASKS,
 }
 
 
@@ -594,4 +662,5 @@ SCENARIO_EXAMPLES: dict[str, str] = {
     "pipeline_style": "examples-pipeline-style",
     "docstring_position": "examples-docstring-position",
     "attribute_access": "examples-attribute-access",
+    "if_elif_context": "examples-if-elif-context",
 }
