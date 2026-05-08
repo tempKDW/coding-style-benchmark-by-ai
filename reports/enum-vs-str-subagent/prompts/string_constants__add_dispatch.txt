@@ -1,0 +1,44 @@
+Candidate: string_constants.py
+
+Task:
+permission_level(role) 함수를 추가하세요. USER이면 1, ADMIN이면 2, SUPER_ADMIN이면 3을 반환합니다. 잘못된 role이면 ValueError가 발생해야 합니다 (기존 검증 메커니즘 활용). 기존 함수들은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+USER = "USER"
+ADMIN = "ADMIN"
+SUPER_ADMIN = "SUPER_ADMIN"
+
+ALLOWED_ROLES = (USER, ADMIN, SUPER_ADMIN)
+
+
+def validate_role(role):
+    if role not in ALLOWED_ROLES:
+        raise ValueError(f"invalid role: {role}")
+    return role
+
+
+def can_access(role, resource):
+    validate_role(role)
+    if role == USER:
+        return resource in {"profile", "feed"}
+    if role == ADMIN:
+        return resource in {"profile", "feed", "users", "logs"}
+    if role == SUPER_ADMIN:
+        return True
+    return False
+
+
+def role_label(role):
+    validate_role(role)
+    if role == USER:
+        return "사용자"
+    if role == ADMIN:
+        return "관리자"
+    if role == SUPER_ADMIN:
+        return "최고관리자"
+    return ""
+

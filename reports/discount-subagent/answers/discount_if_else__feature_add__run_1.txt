@@ -1,0 +1,22 @@
+def calculate_discount(price, user_type, coupon_amount=0):
+    discount = 0
+
+    if user_type == "VIP":
+        discount = price * 0.15
+    elif user_type == "NEW":
+        discount = price * 0.05
+    elif user_type == "BLACK_FRIDAY":
+        if price >= 100000:
+            discount = price * 0.30
+        else:
+            discount = price * 0.15
+
+    if coupon_amount:
+        discount += coupon_amount
+
+    return discount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return price - discount

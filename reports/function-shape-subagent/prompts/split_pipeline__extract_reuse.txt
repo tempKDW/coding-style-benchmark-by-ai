@@ -1,0 +1,84 @@
+Candidate: split_pipeline.py
+
+Task:
+세금(tax) 계산 로직만 다른 컨텍스트(예: 환불 계산)에서 재사용하려면 어떤 위치를 어떻게 추출/리팩터해야 하는지 최소 단위로 나열하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+def validate(ctx):
+    if not ctx["items"]:
+        raise ValueError("empty cart")
+    if not ctx["address"]:
+        raise ValueError("missing address")
+    return ctx
+
+
+def price(ctx):
+    ctx["subtotal"] = sum(item["price"] * item["qty"] for item in ctx["items"])
+    ctx["discount"] = ctx["subtotal"] * 0.10 if ctx["coupon_code"] == "SAVE10" else 0
+    return ctx
+
+
+def ship(ctx):
+    ctx["ship_fee"] = 5000 if ctx["ship_method"] == "standard" else 10000
+    return ctx
+
+
+def tax(ctx):
+    rate = 0.10 if ctx["tax_country"] == "KR" else 0.05
+    ctx["tax"] = (ctx["subtotal"] - ctx["discount"] + ctx["ship_fee"]) * rate
+    return ctx
+
+
+def pay(ctx):
+    total = ctx["subtotal"] - ctx["discount"] + ctx["ship_fee"] + ctx["tax"]
+    return {
+        "ok": True,
+        "user_id": ctx["user_id"],
+        "subtotal": ctx["subtotal"],
+        "discount": ctx["discount"],
+        "ship_fee": ctx["ship_fee"],
+        "tax": ctx["tax"],
+        "total": total,
+        "currency": ctx["currency"],
+        "payment_method": ctx["payment_method"],
+    }
+
+
+def process_order(
+    user_id,
+    items,
+    coupon_code,
+    address,
+    ship_method,
+    payment_method,
+    payment_token,
+    tax_country,
+    currency,
+    idempotency_key,
+):
+    ctx = {
+        "user_id": user_id,
+        "items": items,
+        "coupon_code": coupon_code,
+        "address": address,
+        "ship_method": ship_method,
+        "payment_method": payment_method,
+        "payment_token": payment_token,
+        "tax_country": tax_country,
+        "currency": currency,
+        "idempotency_key": idempotency_key,
+    }
+    validate(ctx)
+    price(ctx)
+    ship(ctx)
+    tax(ctx)
+    return pay(ctx)
+

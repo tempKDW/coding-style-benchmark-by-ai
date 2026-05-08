@@ -1,0 +1,107 @@
+Candidate: method_chain.py
+
+Task:
+VIP 사용자(tax_country == 'KR_VIP')는 shipping 비용을 0원으로 처리하세요. 기존 ship_method 기반 계산은 비-VIP에 대해서만 적용됩니다. 다른 단계(검증, 가격, 세금, 결제) 로직은 그대로 유지해야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+class OrderProcessor:
+    def __init__(
+        self,
+        user_id,
+        items,
+        coupon_code,
+        address,
+        ship_method,
+        payment_method,
+        payment_token,
+        tax_country,
+        currency,
+        idempotency_key,
+    ):
+        self.user_id = user_id
+        self.items = items
+        self.coupon_code = coupon_code
+        self.address = address
+        self.ship_method = ship_method
+        self.payment_method = payment_method
+        self.payment_token = payment_token
+        self.tax_country = tax_country
+        self.currency = currency
+        self.idempotency_key = idempotency_key
+        self.subtotal = 0
+        self.discount = 0
+        self.ship_fee = 0
+        self.tax = 0
+
+    def validate(self):
+        if not self.items:
+            raise ValueError("empty cart")
+        if not self.address:
+            raise ValueError("missing address")
+        return self
+
+    def price(self):
+        self.subtotal = sum(item["price"] * item["qty"] for item in self.items)
+        self.discount = self.subtotal * 0.10 if self.coupon_code == "SAVE10" else 0
+        return self
+
+    def ship(self):
+        self.ship_fee = 5000 if self.ship_method == "standard" else 10000
+        return self
+
+    def compute_tax(self):
+        rate = 0.10 if self.tax_country == "KR" else 0.05
+        self.tax = (self.subtotal - self.discount + self.ship_fee) * rate
+        return self
+
+    def pay(self):
+        total = self.subtotal - self.discount + self.ship_fee + self.tax
+        return {
+            "ok": True,
+            "user_id": self.user_id,
+            "subtotal": self.subtotal,
+            "discount": self.discount,
+            "ship_fee": self.ship_fee,
+            "tax": self.tax,
+            "total": total,
+            "currency": self.currency,
+            "payment_method": self.payment_method,
+        }
+
+
+def process_order(
+    user_id,
+    items,
+    coupon_code,
+    address,
+    ship_method,
+    payment_method,
+    payment_token,
+    tax_country,
+    currency,
+    idempotency_key,
+):
+    return (
+        OrderProcessor(
+            user_id,
+            items,
+            coupon_code,
+            address,
+            ship_method,
+            payment_method,
+            payment_token,
+            tax_country,
+            currency,
+            idempotency_key,
+        )
+        .validate()
+        .price()
+        .ship()
+        .compute_tax()
+        .pay()
+    )
+

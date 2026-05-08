@@ -1,0 +1,40 @@
+Candidate: hybrid.py
+
+Task:
+이 코드의 레이어링 스타일, 데이터와 동작이 어디에 살고 있는지, 발견성(discoverability)과 cross-aggregate 워크플로우를 어떻게 다루는지, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+class Account:
+    def __init__(self, id, balance, frozen=False):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance < amount:
+            raise ValueError("insufficient")
+        self.balance -= amount
+
+    def freeze(self, reason):
+        self.frozen = True
+
+
+def transfer(from_account, to_account, amount):
+    from_account.withdraw(amount)
+    to_account.deposit(amount)
+

@@ -13,12 +13,12 @@
 
 | Scenario | 후보 디렉터리 | 핵심 질문 | 핵심 발견 |
 |---|---|---|---|
-| `discount` | `examples-discount/` | if-else vs rules-dict vs strategy | 짧은 코드 한계 — 점수 차이 작음 |
-| `validation` | `examples-validation/` | early-return vs try-except vs 외부 validate | external_validate가 feature_add에서 14 lines (early 6의 2.3×) |
-| `function_shape` | `examples-function-shape/` | monolithic vs split_chain vs split_pipeline vs method_chain | split_chain이 cross-cutting param 추가에서 8 lines (monolithic 2의 4×) |
-| `domain_layering` | `examples-domain-layering/` | anemic+service vs rich domain vs hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×) |
-| `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴) |
-| `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음 |
+| `discount` | `examples-discount/` | if-else vs rules-dict vs strategy | 짧은 코드 한계 — 점수 차이 작음. **subagent 검증**: main 점수 -11.27 (p=0.011 \*, dz=0.79, n=15) — 8개 시나리오 중 **가장 큰 self-bias 인플레이션**. changed_lines도 main이 1.4 더 적음(p=0.016 \*) — "짧은 코드 → 점수 노이즈" 가정 정반대. policy/functional change 태스크라 메인이 가설 알면 의식적으로 키워드 정렬 |
+| `validation` | `examples-validation/` | early-return vs try-except vs 외부 validate | external_validate가 feature_add에서 14 lines (early 6의 2.3×). **subagent 검증**: main vs sub Δ=0.00 (p=1.00 ns) — 모든 15 cell 점수가 정확히 일치. patch 답변은 동일한 1줄 변경에 수렴, analysis는 prose 다르나 expected_terms 만점 동점. **채점 rubric이 prose 차이를 detect 못하는 시나리오의 예** |
+| `function_shape` | `examples-function-shape/` | monolithic vs split_chain vs split_pipeline vs method_chain | split_chain이 cross-cutting param 추가에서 8 lines (monolithic 2의 4×). **subagent 검증**: main 점수 -8.33 (p=0.002 \*\*, dz=0.52, n=24) — discount 다음으로 큰 인플레이션. 4-candidate × 6-task 24-cell이라 통계 검정력 가장 강함 |
+| `domain_layering` | `examples-domain-layering/` | anemic+service vs rich domain vs hybrid | anemic이 cross-cutting audit에서 16 lines (rich 7의 2.3×). **subagent 검증**: main 점수 -2.12 (p=0.50 ns, dz=0.32) — 효과 작고 비유의. 도메인 레이어링 가설은 메인이 알아도 답변 영향 적음 |
+| `enum_vs_str` | `examples-enum-vs-str/` | bare strings vs string constants vs Enum | string_constants가 rename에서 8 lines (함정 패턴). **subagent 검증**: main 점수 -0.16 (p=0.125 ns, dz=0.55) — 평균 거의 0이지만 dz medium. n=15 underpowered, cell-level 분산이 커서 평균 상쇄 |
+| `pipeline_style` | `examples-pipeline-style/` | with_locals vs inline_chain vs domain_locals | 차이 1 line 이내 — orchestration은 가독성 문제, 마찰 비용 영향 없음. **subagent 검증**: main 점수 -4.77 (p=0.031 \*, dz=0.50) — 중간 인플레이션. orchestration 가독성 가설은 self-bias 보정 후에도 유지 |
 | `docstring_position` | `examples-docstring-position/` | header_full vs split_inline vs post_validation_block | 두 신호가 갈림 — 점수 평균은 header_full 90.80 1위(diff_minimality가 비율이라 긴 docstring이 분모로 유리), 절대 changed_lines는 split_inline 최소(rule 19/feature 14/edge 7). post_validation_block의 (a)~(d) 번호 블록은 feature_add에서 27 lines로 cascade renumbering 함정 노출. 1.07점 폭은 89±2 노이즈 한계 안. **subagent 검증**: explain_code 일괄 -14.7점(term-aware self-bias 증거), feature_add×split_inline +8 lines(가설 정렬 의심). **anonymize+subagent 검증**: split_inline explain_code 100점 회복(다른 둘은 변화 없음) → **vocabulary anchoring 발견**(이름 'split_inline'이 LLM 답변에서 'docstring' 어휘를 회피하게 함). 순위 변화: main/sub는 header_full 1위, sub+anon은 split_inline 1위 — 이름 hint가 결과 자체를 흔듦 |
 | `attribute_access` | `examples-attribute-access/` | hasattr+getattr (string) vs dot+try/except vs getattr(default) | rename 가설 깨짐 — 세 후보 모두 4 lines (hasattr_getattr는 1줄 패턴이라 통째 교체로 끝남, string 매치 함정은 정확성 차원이라 changed_lines로 안 잡힘). feature_add는 dot_try_except 7 lines로 가장 비쌈(다른 둘 4의 1.75×, try/except verbosity). 점수는 dot_try_except 92.64 1위지만 절대 변경량은 getattr_default 최소(rule 5/feature 4/rename 4) — diff_minimality 비율 함정 재확인. **subagent 검증**: main 점수 일괄 -5.00 (p=0.016 \*, dz=0.71) — docstring_position(-3.34)보다 큰 self-bias 인플레이션. **anonymize+sub 추가 효과 비유의** (sub vs sub+anon p=0.75) — vocabulary anchoring 시나리오-level 효과 없음 재확인 |
 
@@ -53,7 +53,7 @@ API 키 없이 진행하는 패턴 (실 워크플로우):
 
 ## Self-bias mitigation — 가설 작성자와 답변 작성자 세션 분리
 
-self-bias는 메인 세션이 가설·expected_terms·이전 결과를 알고 답변을 작성할 때 발생합니다. 이 벤치마크의 docstring_position 검증에서 **explain_code 점수가 일괄 14.7점 인플레이션**된 직접 증거가 잡혔습니다 (메인이 expected_terms를 의식해 키워드를 의도적으로 포함). 이를 줄이는 운영 룰:
+self-bias는 메인 세션이 가설·expected_terms·이전 결과를 알고 답변을 작성할 때 발생합니다. 이 벤치마크의 docstring_position 검증에서 **explain_code 점수가 일괄 14.7점 인플레이션**된 직접 증거가 잡혔습니다 (메인이 expected_terms를 의식해 키워드를 의도적으로 포함). 8 시나리오 전수 검증에서 5/8이 통계적 유의 (cross-scenario 표 참고). 이를 줄이는 운영 룰:
 
 - 답변 작성은 메인 세션이 직접 하지 말고 `Agent` tool의 `general-purpose` subagent에 dispatch.
 - subagent dispatch 프롬프트에 노출 **금지**: 가설 텍스트, AGENTS.md 시나리오 인덱스 표, 이전 시나리오 결과·점수, expected_terms 목록.
@@ -85,20 +85,29 @@ python3 compare_runs.py <run_dir1> <run_dir2> [<run_dir3> ...]
 - sub vs sub+anon: score Δ=-1.06 p=0.35 (ns) — **anonymize의 추가 효과는 비유의** (vocabulary anchoring은 cell-level 현상).
 - changed_lines는 모든 비교에서 p>0.14 — N=15에선 변별력 부족. "changed_lines가 점수보다 정직한 신호"는 self-bias robust 측면에선 맞지만 통계적 검출력은 약함.
 
-**Cross-scenario 일관성** (docstring_position + attribute_access, n=15 each):
+**Cross-scenario 일관성** (8 시나리오 전수 검증, 2026-05-08):
 
-| 시나리오 | main vs sub Δscore | p | dz | sub vs sub+anon | p |
-|---|---:|---:|---:|---:|---:|
-| docstring_position | +3.34 | 0.019 \* | 0.56 | -1.06 | 0.35 ns |
-| attribute_access | +5.00 | 0.016 \* | 0.71 | +0.11 | 0.75 ns |
+| 시나리오 | n | main vs sub Δscore | p | dz | 비고 |
+|---|---:|---:|---:|---:|---|
+| discount | 15 | +11.27 | 0.011 \* | 0.79 | 가장 큼. policy change 태스크 |
+| function_shape | 24 | +8.33 | 0.002 \*\* | 0.52 | n=24로 검정력 최강 |
+| attribute_access | 15 | +5.00 | 0.016 \* | 0.71 | 짧은 코드(~11줄) |
+| pipeline_style | 15 | +4.77 | 0.031 \* | 0.50 | |
+| docstring_position | 15 | +3.34 | 0.019 \* | 0.56 | term-aware 직접 증거 |
+| domain_layering | 15 | +2.12 | 0.500 ns | 0.32 | |
+| enum_vs_str | 15 | +0.16 | 0.125 ns | 0.55 | dz medium, n underpowered |
+| validation | 15 | +0.00 | 1.000 ns | 0.00 | rubric saturation |
 
-두 시나리오에서:
-- **self-bias 인플레이션 +3~5점, p<0.05, medium~large effect** — 시나리오-독립 일관 패턴.
-- **anonymize 추가 효과 비유의** — vocabulary anchoring은 cell-level 현상.
-- **changed_lines 모든 비교 비유의** (p>0.14) — N=15에선 통계 변별력 부족.
-- 짧은 코드(attribute_access ~11줄)에서 self-bias 인플레이션이 더 큼 — 점수 변동성 작을수록 메인 의식적 키워드 포함 효과 두드러짐.
+**5/8 시나리오에서 self-bias 인플레이션 통계적 유의** (p<0.05). 평균 Δ=+4.4점. 폭은 +0~+11점으로 시나리오 의존성이 매우 큼.
 
-**해석**: 본 벤치마크의 메인 세션 결과는 평균 **+3~5점 인플레이션**을 가정하고 읽어야 합니다. score 차이가 5점 미만이면 self-bias 노이즈 안일 확률이 큽니다. 후보 간 진짜 차이를 보려면 항상 subagent dispatch 결과로 비교하세요. anonymize는 cell-level 비정상치 진단용으로만 가치 있고 시나리오-level mitigation으로는 불필요.
+핵심 패턴:
+- **functional/policy change 태스크 + 짧은 코드** 조합에서 인플레이션 가장 큼 (discount, attribute_access). 점수 변동성이 작을수록 메인이 의식적으로 expected_terms를 깔끔하게 정렬하는 효과 두드러짐.
+- **structural/architecture 태스크**(domain_layering)는 효과 작음. 메인이 가설을 알아도 답변 prose에 표면화하기 어려움.
+- **validation Δ=0**은 채점 rubric의 한계 — patch가 1줄 변경으로 수렴하고 analysis는 expected_terms 만점에서 동점. self-bias가 없는 게 아니라 **rubric이 detect 못함**. 짧고 결정적인 patch 시나리오는 channel 자체가 닫혀 있음.
+- **anonymize 추가 효과**는 docstring_position·attribute_access 모두 비유의 (p>0.35) — vocabulary anchoring은 cell-level 현상.
+- **changed_lines**는 모든 시나리오에서 거의 비유의 (discount만 p=0.016) — N=15~24에선 통계 변별력 부족, 다만 self-bias robust 측면에서는 점수보다 정직.
+
+**해석**: 본 벤치마크의 메인 세션 결과는 시나리오에 따라 **+0 ~ +11점 인플레이션**이 들어 있습니다. 시나리오별 보정값은 위 표 참고. 일반론으로는 score 차이가 5점 미만이면 self-bias 노이즈 안일 확률이 큽니다. 후보 간 진짜 차이를 보려면 항상 subagent dispatch 결과로 비교하세요. anonymize는 cell-level 비정상치 진단용으로만 가치 있고 시나리오-level mitigation으로는 불필요.
 
 ## 새 시나리오 추가 워크플로우 (표준)
 
@@ -114,7 +123,7 @@ self-bias mitigation 검증(docstring_position + attribute_access cross-scenario
    - 1~2개: control task (모든 후보가 비슷하게 잘함)
    - 1~2개: 차이를 노출시키는 핵심 가설 task
    - 1개: `explain_code` (analysis)
-   - **expected_terms 주의**: 영문 키워드를 강제하면 메인 세션이 의식적으로 포함해 self-bias 인플레이션 발생 (+3~5점, p<0.05 입증). 자연스럽게 등장할 단어만 선택.
+   - **expected_terms 주의**: 영문 키워드를 강제하면 메인 세션이 의식적으로 포함해 self-bias 인플레이션 발생 (시나리오 따라 +0 ~ +11점, 5/8 시나리오에서 p<0.05 입증). 자연스럽게 등장할 단어만 선택.
 
 3. **시나리오 등록**: `SCENARIOS`, `SCENARIO_EXAMPLES` 딕셔너리에 키 추가.
 
@@ -124,7 +133,7 @@ self-bias mitigation 검증(docstring_position + attribute_access cross-scenario
    ```
 
 5. **답변 작성 — subagent dispatch (의무)**:
-   `Agent` tool, `subagent_type=general-purpose` 로 dispatch. 프롬프트는 `scripts/SUBAGENT_PROMPT.md` 템플릿의 `<SCENARIO>` 를 실제 시나리오 디렉터리 이름으로 치환해 사용. **메인 세션이 직접 답변하지 말 것** — self-bias +3~5점 인플레이션 통계 입증.
+   `Agent` tool, `subagent_type=general-purpose` 로 dispatch. 프롬프트는 `scripts/SUBAGENT_PROMPT.md` 템플릿의 `<SCENARIO>` 를 실제 시나리오 디렉터리 이름으로 치환해 사용. **메인 세션이 직접 답변하지 말 것** — 8 시나리오 전수 검증 결과 self-bias +0~+11점 인플레이션 (5/8 p<0.05).
 
 6. **채점**:
    ```bash

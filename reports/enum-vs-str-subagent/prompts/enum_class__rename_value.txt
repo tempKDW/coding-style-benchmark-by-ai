@@ -1,0 +1,44 @@
+Candidate: enum_class.py
+
+Task:
+ADMIN 권한을 MANAGER로 이름과 값 모두 변경하세요. 모든 등장 위치(상수, allowed 목록, 분기, label 등)를 일관되게 변경합니다. 기존 USER/SUPER_ADMIN과 다른 동작은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+from enum import Enum
+
+
+class Role(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
+
+
+def validate_role(role_value):
+    return Role(role_value)
+
+
+def can_access(role_value, resource):
+    role = Role(role_value)
+    if role is Role.USER:
+        return resource in {"profile", "feed"}
+    if role is Role.ADMIN:
+        return resource in {"profile", "feed", "users", "logs"}
+    if role is Role.SUPER_ADMIN:
+        return True
+    return False
+
+
+def role_label(role_value):
+    role = Role(role_value)
+    if role is Role.USER:
+        return "사용자"
+    if role is Role.ADMIN:
+        return "관리자"
+    if role is Role.SUPER_ADMIN:
+        return "최고관리자"
+    return ""
+

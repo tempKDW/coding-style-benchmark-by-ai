@@ -1,0 +1,50 @@
+Candidate: anemic_service.py
+
+Task:
+이 코드의 레이어링 스타일, 데이터와 동작이 어디에 살고 있는지, 발견성(discoverability)과 cross-aggregate 워크플로우를 어떻게 다루는지, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+from dataclasses import dataclass
+
+
+@dataclass
+class Account:
+    id: str
+    balance: int
+    frozen: bool = False
+
+
+def deposit(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    account.balance += amount
+    return account
+
+
+def withdraw(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    if account.balance < amount:
+        raise ValueError("insufficient")
+    account.balance -= amount
+    return account
+
+
+def freeze(account, reason):
+    account.frozen = True
+    return account
+
+
+def transfer(from_account, to_account, amount):
+    withdraw(from_account, amount)
+    deposit(to_account, amount)
+    return from_account, to_account
+

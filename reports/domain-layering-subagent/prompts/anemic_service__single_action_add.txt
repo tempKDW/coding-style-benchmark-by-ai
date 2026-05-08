@@ -1,0 +1,46 @@
+Candidate: anemic_service.py
+
+Task:
+Account에 unfreeze(account, reason) 또는 unfreeze(self, reason) 동작을 추가하세요. frozen을 False로 설정합니다. 기존 deposit/withdraw/freeze/transfer 로직은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+from dataclasses import dataclass
+
+
+@dataclass
+class Account:
+    id: str
+    balance: int
+    frozen: bool = False
+
+
+def deposit(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    account.balance += amount
+    return account
+
+
+def withdraw(account, amount):
+    if account.frozen:
+        raise ValueError("frozen")
+    if account.balance < amount:
+        raise ValueError("insufficient")
+    account.balance -= amount
+    return account
+
+
+def freeze(account, reason):
+    account.frozen = True
+    return account
+
+
+def transfer(from_account, to_account, amount):
+    withdraw(from_account, amount)
+    deposit(to_account, amount)
+    return from_account, to_account
+

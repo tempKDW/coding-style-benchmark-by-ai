@@ -1,0 +1,80 @@
+Candidate: split_pipeline.py
+
+Task:
+세율을 변경하세요: KR은 0.10에서 0.12로, KR이 아닌 경우는 0.05에서 0.08로. 다른 단계(검증, 가격, 배송, 결제) 로직은 그대로 유지해야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def validate(ctx):
+    if not ctx["items"]:
+        raise ValueError("empty cart")
+    if not ctx["address"]:
+        raise ValueError("missing address")
+    return ctx
+
+
+def price(ctx):
+    ctx["subtotal"] = sum(item["price"] * item["qty"] for item in ctx["items"])
+    ctx["discount"] = ctx["subtotal"] * 0.10 if ctx["coupon_code"] == "SAVE10" else 0
+    return ctx
+
+
+def ship(ctx):
+    ctx["ship_fee"] = 5000 if ctx["ship_method"] == "standard" else 10000
+    return ctx
+
+
+def tax(ctx):
+    rate = 0.10 if ctx["tax_country"] == "KR" else 0.05
+    ctx["tax"] = (ctx["subtotal"] - ctx["discount"] + ctx["ship_fee"]) * rate
+    return ctx
+
+
+def pay(ctx):
+    total = ctx["subtotal"] - ctx["discount"] + ctx["ship_fee"] + ctx["tax"]
+    return {
+        "ok": True,
+        "user_id": ctx["user_id"],
+        "subtotal": ctx["subtotal"],
+        "discount": ctx["discount"],
+        "ship_fee": ctx["ship_fee"],
+        "tax": ctx["tax"],
+        "total": total,
+        "currency": ctx["currency"],
+        "payment_method": ctx["payment_method"],
+    }
+
+
+def process_order(
+    user_id,
+    items,
+    coupon_code,
+    address,
+    ship_method,
+    payment_method,
+    payment_token,
+    tax_country,
+    currency,
+    idempotency_key,
+):
+    ctx = {
+        "user_id": user_id,
+        "items": items,
+        "coupon_code": coupon_code,
+        "address": address,
+        "ship_method": ship_method,
+        "payment_method": payment_method,
+        "payment_token": payment_token,
+        "tax_country": tax_country,
+        "currency": currency,
+        "idempotency_key": idempotency_key,
+    }
+    validate(ctx)
+    price(ctx)
+    ship(ctx)
+    tax(ctx)
+    return pay(ctx)
+

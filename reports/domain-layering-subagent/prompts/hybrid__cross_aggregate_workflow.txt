@@ -1,0 +1,36 @@
+Candidate: hybrid.py
+
+Task:
+transfer_with_fee 워크플로우를 추가하세요. (from_account, to_account, amount, fee_account, fee)을 받아 from_account에서 amount + fee를 출금, to_account에 amount 입금, fee_account에 fee 입금합니다. 기존 transfer는 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+class Account:
+    def __init__(self, id, balance, frozen=False):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance < amount:
+            raise ValueError("insufficient")
+        self.balance -= amount
+
+    def freeze(self, reason):
+        self.frozen = True
+
+
+def transfer(from_account, to_account, amount):
+    from_account.withdraw(amount)
+    to_account.deposit(amount)
+

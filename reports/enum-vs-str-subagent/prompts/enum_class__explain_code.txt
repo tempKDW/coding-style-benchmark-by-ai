@@ -1,0 +1,48 @@
+Candidate: enum_class.py
+
+Task:
+이 코드의 role 타입 표현 방식, validation 메커니즘, 분기 처리 방식, 발견성(discoverability), 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+from enum import Enum
+
+
+class Role(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
+
+
+def validate_role(role_value):
+    return Role(role_value)
+
+
+def can_access(role_value, resource):
+    role = Role(role_value)
+    if role is Role.USER:
+        return resource in {"profile", "feed"}
+    if role is Role.ADMIN:
+        return resource in {"profile", "feed", "users", "logs"}
+    if role is Role.SUPER_ADMIN:
+        return True
+    return False
+
+
+def role_label(role_value):
+    role = Role(role_value)
+    if role is Role.USER:
+        return "사용자"
+    if role is Role.ADMIN:
+        return "관리자"
+    if role is Role.SUPER_ADMIN:
+        return "최고관리자"
+    return ""
+

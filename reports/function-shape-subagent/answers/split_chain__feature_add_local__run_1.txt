@@ -1,0 +1,60 @@
+def validate(user_id, items, address):
+    if not items:
+        raise ValueError("empty cart")
+    if not address:
+        raise ValueError("missing address")
+    return {"user_id": user_id, "items": items}
+
+
+def price(validated, coupon_code):
+    items = validated["items"]
+    subtotal = sum(item["price"] * item["qty"] for item in items)
+    discount = subtotal * 0.10 if coupon_code == "SAVE10" else 0
+    return {**validated, "subtotal": subtotal, "discount": discount}
+
+
+def ship(priced, ship_method):
+    fee = 5000 if ship_method == "standard" else 10000
+    return {**priced, "ship_fee": fee}
+
+
+def tax(shipped, tax_country):
+    rate = 0.10 if tax_country == "KR" else 0.05
+    amount = (shipped["subtotal"] - shipped["discount"] + shipped["ship_fee"]) * rate
+    if shipped["subtotal"] >= 1000000:
+        amount += shipped["subtotal"] * 0.05
+    return {**shipped, "tax": amount}
+
+
+def pay(taxed, payment_method, payment_token, currency):
+    total = taxed["subtotal"] - taxed["discount"] + taxed["ship_fee"] + taxed["tax"]
+    return {
+        "ok": True,
+        "user_id": taxed["user_id"],
+        "subtotal": taxed["subtotal"],
+        "discount": taxed["discount"],
+        "ship_fee": taxed["ship_fee"],
+        "tax": taxed["tax"],
+        "total": total,
+        "currency": currency,
+        "payment_method": payment_method,
+    }
+
+
+def process_order(
+    user_id,
+    items,
+    coupon_code,
+    address,
+    ship_method,
+    payment_method,
+    payment_token,
+    tax_country,
+    currency,
+    idempotency_key,
+):
+    validated = validate(user_id, items, address)
+    priced = price(validated, coupon_code)
+    shipped = ship(priced, ship_method)
+    taxed = tax(shipped, tax_country)
+    return pay(taxed, payment_method, payment_token, currency)

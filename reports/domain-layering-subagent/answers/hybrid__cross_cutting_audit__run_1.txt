@@ -1,0 +1,30 @@
+class Account:
+    def __init__(self, id, balance, frozen=False, audit_log=None):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+        self.audit_log = audit_log if audit_log is not None else []
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+        self.audit_log.append({"op": "deposit", "account_id": self.id, "amount": amount})
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance < amount:
+            raise ValueError("insufficient")
+        self.balance -= amount
+        self.audit_log.append({"op": "withdraw", "account_id": self.id, "amount": amount})
+
+    def freeze(self, reason):
+        self.frozen = True
+        self.audit_log.append({"op": "freeze", "account_id": self.id, "reason": reason})
+
+
+def transfer(from_account, to_account, amount):
+    from_account.withdraw(amount)
+    to_account.deposit(amount)
+    from_account.audit_log.append({"op": "transfer", "account_id": from_account.id, "amount": amount})

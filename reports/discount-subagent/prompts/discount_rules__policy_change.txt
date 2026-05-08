@@ -1,0 +1,27 @@
+Candidate: discount_rules.py
+
+Task:
+VIP는 20%, 신규 유저는 10%, 쿠폰은 최대 5000원까지만 적용되게 정책을 바꾸세요. 기존 동작 중 음수 할인이 나오면 안 됩니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+DISCOUNT_RATES = {
+    "VIP": 0.15,
+    "NEW": 0.05,
+}
+
+
+def calculate_discount(price, user_type, coupon_amount=0):
+    rate = DISCOUNT_RATES.get(user_type, 0)
+    discount = price * rate
+    discount += coupon_amount
+    return discount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return price - discount
+

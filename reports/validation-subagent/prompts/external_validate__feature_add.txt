@@ -1,0 +1,37 @@
+Candidate: external_validate.py
+
+Task:
+register_user에 username 파라미터를 추가하고, 길이가 3 이상 20 이하인지 검증하는 로직을 추가하세요. 다른 검증(email, age, country)은 그대로 유지해야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+class ValidationError(Exception):
+    pass
+
+
+def validate(email, age, country):
+    if "@" not in email:
+        raise ValidationError("invalid email")
+    if not (13 <= age <= 120):
+        raise ValidationError("invalid age")
+    if country not in ALLOWED_COUNTRIES:
+        raise ValidationError("invalid country")
+
+
+def register_user(email, age, country):
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}
+
+
+def handle(email, age, country):
+    try:
+        validate(email, age, country)
+    except ValidationError as exc:
+        return {"ok": False, "error": str(exc)}
+    return register_user(email, age, country)
+

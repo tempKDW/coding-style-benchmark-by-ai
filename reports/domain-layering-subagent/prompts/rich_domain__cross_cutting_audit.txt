@@ -1,0 +1,35 @@
+Candidate: rich_domain.py
+
+Task:
+모든 state-mutating 동작(deposit, withdraw, freeze, transfer)이 호출될 때 audit_log에 {'op': 함수/메서드명, 'account_id': ..., 'amount': ...} 형태의 dict가 append되어야 합니다. (freeze는 amount 대신 reason 기록.) audit_log를 어떻게 전달·보관할지는 코드 스타일에 가장 자연스러운 방식으로 자유롭게 선택하세요(함수 인자, 인스턴스 속성, 데코레이터 등). 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+class Account:
+    def __init__(self, id, balance, frozen=False):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance < amount:
+            raise ValueError("insufficient")
+        self.balance -= amount
+
+    def freeze(self, reason):
+        self.frozen = True
+
+    def transfer_to(self, other, amount):
+        self.withdraw(amount)
+        other.deposit(amount)
+

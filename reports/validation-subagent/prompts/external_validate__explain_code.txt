@@ -1,0 +1,41 @@
+Candidate: external_validate.py
+
+Task:
+이 코드의 검증 흐름, 검증 규칙이 추가/변경되는 지점, 실수하기 쉬운 edge case를 간결하게 설명하세요. JSON만 반환하세요.
+
+Output JSON schema:
+{
+  "target_locations": [{"symbol": "name", "reason": "short reason"}],
+  "answer": "short Korean answer",
+  "confidence": 0.0
+}
+
+
+Code:
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+class ValidationError(Exception):
+    pass
+
+
+def validate(email, age, country):
+    if "@" not in email:
+        raise ValidationError("invalid email")
+    if not (13 <= age <= 120):
+        raise ValidationError("invalid age")
+    if country not in ALLOWED_COUNTRIES:
+        raise ValidationError("invalid country")
+
+
+def register_user(email, age, country):
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}
+
+
+def handle(email, age, country):
+    try:
+        validate(email, age, country)
+    except ValidationError as exc:
+        return {"ok": False, "error": str(exc)}
+    return register_user(email, age, country)
+

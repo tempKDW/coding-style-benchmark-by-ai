@@ -1,0 +1,1 @@
+{"target_locations": [{"symbol": "calculate_discount", "reason": "user_type 분기 if/elif 체인에 BLACK_FRIDAY 케이스를 추가해 price 기준 30%/15% 할인율을 결정해야 함"}], "answer": "calculate_discount 함수의 if/elif 분기에 BLACK_FRIDAY 케이스를 추가하면 됩니다. price>=100000이면 0.30, 아니면 0.15를 적용하는 elif 한 블록이 유일한 수정 위치입니다.", "confidence": 0.9}

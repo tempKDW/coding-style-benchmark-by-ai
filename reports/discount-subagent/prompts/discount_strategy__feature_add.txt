@@ -1,0 +1,34 @@
+Candidate: discount_strategy.py
+
+Task:
+BLACK_FRIDAY 정책을 추가하세요. 상품 금액이 100000원 이상이면 30% 할인, 아니면 15% 할인을 적용합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def vip_discount(price):
+    return price * 0.15
+
+
+def new_user_discount(price):
+    return price * 0.05
+
+
+POLICIES = {
+    "VIP": vip_discount,
+    "NEW": new_user_discount,
+}
+
+
+def calculate_discount(price, user_type, coupon_amount=0):
+    policy = POLICIES.get(user_type)
+    discount = policy(price) if policy else 0
+    return discount + coupon_amount
+
+
+def final_price(price, user_type, coupon_amount=0):
+    discount = calculate_discount(price, user_type, coupon_amount)
+    return price - discount
+

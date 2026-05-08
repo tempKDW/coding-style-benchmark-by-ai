@@ -1,0 +1,11 @@
+ALLOWED_COUNTRIES = ("KR", "US", "JP")
+
+
+def register_user(email, age, country):
+    if not email or not email.strip() or "@" not in email:
+        return {"ok": False, "error": "invalid email"}
+    if not (13 <= age <= 120):
+        return {"ok": False, "error": "invalid age"}
+    if country not in ALLOWED_COUNTRIES:
+        return {"ok": False, "error": "invalid country"}
+    return {"ok": True, "user": {"email": email, "age": age, "country": country}}

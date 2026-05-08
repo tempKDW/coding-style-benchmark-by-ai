@@ -1,0 +1,44 @@
+Candidate: enum_class.py
+
+Task:
+MODERATOR 권한을 추가하세요. can_access에서 MODERATOR는 {'profile', 'feed', 'logs'}에 접근 가능, role_label은 '운영자'를 반환합니다. 기존 USER/ADMIN/SUPER_ADMIN 동작은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+from enum import Enum
+
+
+class Role(Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
+
+
+def validate_role(role_value):
+    return Role(role_value)
+
+
+def can_access(role_value, resource):
+    role = Role(role_value)
+    if role is Role.USER:
+        return resource in {"profile", "feed"}
+    if role is Role.ADMIN:
+        return resource in {"profile", "feed", "users", "logs"}
+    if role is Role.SUPER_ADMIN:
+        return True
+    return False
+
+
+def role_label(role_value):
+    role = Role(role_value)
+    if role is Role.USER:
+        return "사용자"
+    if role is Role.ADMIN:
+        return "관리자"
+    if role is Role.SUPER_ADMIN:
+        return "최고관리자"
+    return ""
+

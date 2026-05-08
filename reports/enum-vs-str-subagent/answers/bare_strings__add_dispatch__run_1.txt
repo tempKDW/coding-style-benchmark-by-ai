@@ -1,0 +1,37 @@
+def validate_role(role):
+    if role not in ("USER", "ADMIN", "SUPER_ADMIN"):
+        raise ValueError(f"invalid role: {role}")
+    return role
+
+
+def can_access(role, resource):
+    validate_role(role)
+    if role == "USER":
+        return resource in {"profile", "feed"}
+    if role == "ADMIN":
+        return resource in {"profile", "feed", "users", "logs"}
+    if role == "SUPER_ADMIN":
+        return True
+    return False
+
+
+def role_label(role):
+    validate_role(role)
+    if role == "USER":
+        return "사용자"
+    if role == "ADMIN":
+        return "관리자"
+    if role == "SUPER_ADMIN":
+        return "최고관리자"
+    return ""
+
+
+def permission_level(role):
+    validate_role(role)
+    if role == "USER":
+        return 1
+    if role == "ADMIN":
+        return 2
+    if role == "SUPER_ADMIN":
+        return 3
+    return 0

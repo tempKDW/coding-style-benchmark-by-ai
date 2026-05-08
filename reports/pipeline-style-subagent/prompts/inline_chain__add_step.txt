@@ -1,0 +1,46 @@
+Candidate: inline_chain.py
+
+Task:
+parse와 filter_errors 사이에 normalize_timestamps(events) 단계를 추가하세요. normalize_timestamps는 각 event의 timestamp를 ISO 8601 형식으로 변환하는 함수로 이 파일 안에 정의합니다 (간단히 string 그대로 반환해도 OK). process 함수에서 호출되어야 합니다. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+def read_log(path):
+    with open(path) as f:
+        return f.readlines()
+
+
+def parse(lines):
+    events = []
+    for line in lines:
+        parts = line.strip().split(" ", 3)
+        if len(parts) == 4:
+            events.append({"timestamp": parts[0], "level": parts[1], "status": int(parts[2]), "message": parts[3]})
+    return events
+
+
+def filter_errors(events):
+    return [e for e in events if e["status"] >= 500]
+
+
+def compute_stats(events, error_events):
+    total = len(events)
+    error_count = len(error_events)
+    return {
+        "total": total,
+        "error_count": error_count,
+        "error_rate": error_count / total if total else 0.0,
+    }
+
+
+def format_report(stats):
+    return f"total={stats['total']} errors={stats['error_count']} rate={stats['error_rate']:.2%}"
+
+
+def process(path):
+    events = parse(read_log(path))
+    return format_report(compute_stats(events, filter_errors(events)))
+

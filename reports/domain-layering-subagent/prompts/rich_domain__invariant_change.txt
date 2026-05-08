@@ -1,0 +1,35 @@
+Candidate: rich_domain.py
+
+Task:
+Account에 min_balance 필드를 추가하고(default 0), withdraw 시 balance - amount가 min_balance 미만이면 ValueError('insufficient')를 발생시키도록 변경하세요. 다른 동작(deposit, freeze, transfer)은 그대로 유지하세요. 수정된 전체 코드만 반환하세요.
+
+Output the complete revised code only.
+Do not include Markdown fences or commentary.
+
+
+Code:
+class Account:
+    def __init__(self, id, balance, frozen=False):
+        self.id = id
+        self.balance = balance
+        self.frozen = frozen
+
+    def deposit(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.frozen:
+            raise ValueError("frozen")
+        if self.balance < amount:
+            raise ValueError("insufficient")
+        self.balance -= amount
+
+    def freeze(self, reason):
+        self.frozen = True
+
+    def transfer_to(self, other, amount):
+        self.withdraw(amount)
+        other.deposit(amount)
+
