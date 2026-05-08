@@ -1,0 +1,11 @@
+candidate,task_id,task_name,run,score,correctness,location_precision,diff_minimality,edge_preservation,explanation_quality,changed_lines,target_location_count,notes
+style_a.py,explain_branches,Explain branching logic,1,100.0,1.0,1.0,1.0,1.0,1.0,0,1,
+style_a.py,rename_channel,Rename 'test' channel to 'staging',1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
+style_a.py,add_channel_value,Add 'qa' channel routing,1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
+style_a.py,swap_precedence,Swap precedence — priority before channel,1,77.5,1.0,1.0,0.167,1.0,0.0,10,0,
+style_a.py,add_compound_rule,"Add compound rule for (prod, priority=1)",1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
+style_b.py,explain_branches,Explain branching logic,1,100.0,1.0,1.0,1.0,1.0,1.0,0,1,
+style_b.py,rename_channel,Rename 'test' channel to 'staging',1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
+style_b.py,add_channel_value,Add 'qa' channel routing,1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
+style_b.py,swap_precedence,Swap precedence — priority before channel,1,77.5,1.0,1.0,0.167,1.0,0.0,10,0,
+style_b.py,add_compound_rule,"Add compound rule for (prod, priority=1)",1,87.5,1.0,1.0,0.833,1.0,0.0,2,0,
