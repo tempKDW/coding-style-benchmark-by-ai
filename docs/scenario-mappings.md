@@ -24,6 +24,7 @@
 | 시나리오 | `style_a` | `style_b` | `style_c` | (`style_d`) |
 |---|---|---|---|---|
 | (예시) `error_handling` | `early_raise` | `result_type` | `optional_return` | — |
+| `if_elif_context` | `separated` | `merged` | — | — |
 
 ## 운영 룰 요약
 
